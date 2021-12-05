@@ -1,4 +1,4 @@
-package pl.lodz.p.chinczyk;
+package pl.lodz.chinczyk;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
