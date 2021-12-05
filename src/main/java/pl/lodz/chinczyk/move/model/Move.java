@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import java.util.UUID;
 
+import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Getter
@@ -22,7 +23,7 @@ public class Move {
     private UUID id;
     private int number;
     private int distance;
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     private Pawn pawn;
 
 }

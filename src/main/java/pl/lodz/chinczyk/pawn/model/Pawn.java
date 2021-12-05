@@ -3,16 +3,19 @@ package pl.lodz.chinczyk.pawn.model;
 import lombok.Getter;
 import lombok.Setter;
 import pl.lodz.chinczyk.move.model.Move;
+import pl.lodz.chinczyk.playergame.model.PlayerGame;
 
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.util.Set;
 import java.util.UUID;
 
 import static javax.persistence.EnumType.STRING;
+import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Getter
@@ -27,7 +30,8 @@ public class Pawn {
     private Color color;
     @Enumerated(STRING)
     private Location location;
-    @OneToMany
+    @OneToMany(mappedBy = "pawn")
     private Set<Move> moves;
-
+    @ManyToOne(fetch = LAZY)
+    private PlayerGame playerGame;
 }

@@ -24,6 +24,6 @@ public class Game {
     private UUID id;
     @Enumerated(STRING)
     private GameStatus status;
-    @OneToMany
+    @OneToMany(mappedBy = "game")
     private Set<PlayerGame> playerGameSet;
 }

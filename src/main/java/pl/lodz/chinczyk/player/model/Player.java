@@ -22,6 +22,6 @@ public class Player {
     @GeneratedValue(strategy = IDENTITY)
     private UUID id;
     private String nick;
-    @OneToMany
+    @OneToMany(mappedBy = "player")
     private Set<PlayerGame> playerGameSet;
 }
