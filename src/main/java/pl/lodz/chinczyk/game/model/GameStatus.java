@@ -1,5 +1,5 @@
 package pl.lodz.chinczyk.game.model;
 
 public enum GameStatus {
-    IN_PROGRESS, DONE
+    NEW, IN_PROGRESS, DONE
 }

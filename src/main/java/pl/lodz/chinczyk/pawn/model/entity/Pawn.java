@@ -1,9 +1,12 @@
-package pl.lodz.chinczyk.pawn.model;
+package pl.lodz.chinczyk.pawn.model.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import pl.lodz.chinczyk.move.model.Move;
-import pl.lodz.chinczyk.playergame.model.PlayerGame;
+import pl.lodz.chinczyk.game.model.entity.Game;
+import pl.lodz.chinczyk.move.model.entity.Move;
+import pl.lodz.chinczyk.pawn.model.Color;
+import pl.lodz.chinczyk.pawn.model.Location;
+import pl.lodz.chinczyk.player.model.entity.Player;
 
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -11,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,7 +35,9 @@ public class Pawn {
     @Enumerated(STRING)
     private Location location;
     @OneToMany(mappedBy = "pawn")
-    private Set<Move> moves;
+    private Set<Move> moves = new HashSet<>();
     @ManyToOne(fetch = LAZY)
-    private PlayerGame playerGame;
+    private Game game;
+    @ManyToOne(fetch = LAZY)
+    private Player player;
 }
