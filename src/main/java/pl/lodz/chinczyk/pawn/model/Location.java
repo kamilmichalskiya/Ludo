@@ -44,45 +44,51 @@ public enum Location {
         };
     }
 
-    public Location getNewLocation(@NonNull Color color, int distance) {
-        if (getType() == HOME) {
-            return this;
-        } else if (getType() == BASE) {
-            if (distance == 6) {
-                return switch (color) {
-                    case RED -> R_0;
-                    case BLUE -> B_0;
-                    case GREEN -> G_0;
-                    case YELLOW -> Y_0;
-                };
-            } else {
-                return this;
-            }
+    public Location getLocationAfterMove(@NonNull Color colorOfPawn, int distance) {
+        if (getType() == BASE && distance == 6) return getStartLocation(colorOfPawn);
+        else if (getType() == HOME || getType() == BASE) return this;
+        else if (distance == 0) return getBase(colorOfPawn);
+
+        Color nextColor;
+        int nextPlace = this.placeNumber + distance;
+        if (nextPlace > 9) {
+            nextColor = getNextColor();
+            if (nextColor == colorOfPawn) return getHome(colorOfPawn);
         } else {
-            int nextPlace = this.placeNumber + distance;
-            int moduloNextPlace = (this.placeNumber + distance) % 10;
-            Color color1;
-            if (nextPlace > 9) {
-                color1 = switch (this.color) {
-                    case RED -> GREEN;
-                    case GREEN -> BLUE;
-                    case BLUE -> YELLOW;
-                    case YELLOW -> RED;
-                };
-                if (color == color1) {
-                    return switch (color) {
-                        case RED -> R_HOME;
-                        case GREEN -> G_HOME;
-                        case BLUE -> B_HOME;
-                        case YELLOW -> Y_HOME;
-                    };
-                }
-            } else {
-                color1 = this.color;
-            }
-            return Arrays.stream(Location.values())
-                    .filter(location -> location.placeNumber == moduloNextPlace && location.color == color1)
-                    .findFirst().get();
+            nextColor = this.color;
         }
+
+        return Arrays.stream(Location.values())
+                .filter(location -> location.color == nextColor)
+                .filter(location -> location.placeNumber == nextPlace % 10)
+                .findFirst()
+                .orElse(this);
+    }
+
+    private Color getNextColor() {
+        return switch (this.color) {
+            case RED -> GREEN;
+            case GREEN -> BLUE;
+            case BLUE -> YELLOW;
+            case YELLOW -> RED;
+        };
+    }
+
+    private Location getHome(@NonNull Color color) {
+        return switch (color) {
+            case RED -> R_HOME;
+            case GREEN -> G_HOME;
+            case BLUE -> B_HOME;
+            case YELLOW -> Y_HOME;
+        };
+    }
+
+    private Location getStartLocation(@NonNull Color color) {
+        return switch (color) {
+            case RED -> R_0;
+            case BLUE -> B_0;
+            case GREEN -> G_0;
+            case YELLOW -> Y_0;
+        };
     }
 }

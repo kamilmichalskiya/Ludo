@@ -20,7 +20,8 @@ public class MoveController {
     private final MoveService service;
     private final MoveMapper mapper;
 
-    public MoveController(final MoveService service, final MoveMapper mapper) {
+    public MoveController(final MoveService service,
+                          final MoveMapper mapper) {
         this.service = service;
         this.mapper = mapper;
     }

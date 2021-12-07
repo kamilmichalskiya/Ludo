@@ -2,6 +2,8 @@ package pl.lodz.chinczyk.game.service;
 
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pl.lodz.chinczyk.game.model.GameStatus;
 import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.game.service.repository.GameRepository;
 
@@ -28,13 +30,14 @@ public class GameService {
         return Optional.of(repository.save(game));
     }
 
-    public Optional<List<Game>> getAllNewGames() {
-        return Optional.of(repository.findAllByStatus(NEW));
+    public Optional<List<Game>> getAllGamesByStatus(@NonNull GameStatus status) {
+        return Optional.of(repository.findAllByStatus(status));
     }
 
+    @Transactional
     public Optional<Game> startGame(@NonNull UUID id) {
         return findById(id)
-                .filter(game -> game.getStatus() == NEW && game.getPawns().size() >= 8)//8 - minimum pawns (2 players)
+                .filter(game -> game.getStatus() == NEW && game.getPawns().size() >= 8) //8 - minimum number of pawns (2 players)
                 .map(game -> {
                     game.setStatus(IN_PROGRESS);
                     //TODO send information of not available to join game (websocket)

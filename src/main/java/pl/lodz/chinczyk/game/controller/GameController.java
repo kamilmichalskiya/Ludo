@@ -4,9 +4,11 @@ import lombok.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lodz.chinczyk.game.controller.mapper.GameMapper;
+import pl.lodz.chinczyk.game.model.GameStatus;
 import pl.lodz.chinczyk.game.model.dto.GameDTO;
 import pl.lodz.chinczyk.game.service.GameService;
 
@@ -19,14 +21,15 @@ public class GameController {
     private final GameService service;
     private final GameMapper mapper;
 
-    public GameController(final GameService service, final GameMapper mapper) {
+    public GameController(final GameService service,
+                          final GameMapper mapper) {
         this.service = service;
         this.mapper = mapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<GameDTO>> getAllNewGames() {
-        return service.getAllNewGames()
+    public ResponseEntity<List<GameDTO>> getAllGamesByStatus(@RequestBody @NonNull GameStatus status) {
+        return service.getAllGamesByStatus(status)
                 .map(mapper::mapToDTOList)
                 .map(ResponseEntity::ok)
                 .orElseGet(ResponseEntity.badRequest()::build);

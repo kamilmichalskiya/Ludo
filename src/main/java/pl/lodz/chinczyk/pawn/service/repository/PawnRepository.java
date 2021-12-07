@@ -11,6 +11,4 @@ import java.util.UUID;
 @Repository
 public interface PawnRepository extends JpaRepository<Pawn, UUID> {
     List<Pawn> findAllByGame(Game game);
-
-    List<Pawn> findAllByGameId(UUID id);
 }

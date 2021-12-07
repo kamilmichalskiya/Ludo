@@ -6,17 +6,14 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.move.model.entity.Move;
 import pl.lodz.chinczyk.move.service.repository.MoveRepository;
-import pl.lodz.chinczyk.pawn.model.Location;
 import pl.lodz.chinczyk.pawn.model.entity.Pawn;
 import pl.lodz.chinczyk.pawn.service.PawnService;
 
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static pl.lodz.chinczyk.game.model.GameStatus.IN_PROGRESS;
-import static pl.lodz.chinczyk.pawn.model.LocationType.BASE;
 import static pl.lodz.chinczyk.pawn.model.LocationType.HOME;
 
 @Service
@@ -24,18 +21,10 @@ public class MoveService {
     private final MoveRepository repository;
     private final PawnService pawnService;
 
-    public MoveService(final MoveRepository repository, final PawnService pawnService) {
+    public MoveService(final MoveRepository repository,
+                       final PawnService pawnService) {
         this.repository = repository;
         this.pawnService = pawnService;
-    }
-
-    public Optional<Move> save(@NonNull Move move) {
-        move.setId(null);
-        return Optional.of(repository.save(move));
-    }
-
-    public int getNumber(Game game) {
-        return repository.countByPawnGame(game);
     }
 
     public int getRandomNumber() {
@@ -58,47 +47,41 @@ public class MoveService {
         return pawnService.findById(pawnId)
                 .filter(pawn -> pawn.getGame().getStatus() == IN_PROGRESS)
                 .filter(pawn -> pawn.getLocation().getType() != HOME)
-                .map(pawn -> {
-                    Move move = new Move();
-                    move.setOldLocation(pawn.getLocation());
-                    move.setNewLocation(pawn.getLocation().getNewLocation(pawn.getColor(), distance));
-                    move.setDistance(distance);
-                    move.setPawn(pawn);
-                    return move;
-                })
-                .flatMap(move -> Optional.of(move.getPawn())
-                        .map(Pawn::getGame)
-                        .flatMap(pawnService::findAllByGame)
-                        .flatMap(pawns -> {
-                            Stream<Pawn> pawnStream = pawns.stream()
-                                    .filter(pawn -> pawn.getLocation().getType() != BASE)
-                                    .filter(pawn -> pawn.getLocation().getType() != HOME);
-                            if (pawnStream.noneMatch(pawn -> pawn.getLocation() == move.getNewLocation())) {
-                                //TODO zapisz ruch i wyślij informacje do wszystkich
-                                //TODO dodaj nr ruchu
-                                return save(move);
-                            } else {
-                                return pawnStream.filter(pawn -> pawn.getColor() != move.getPawn().getColor())
-                                        .findFirst()
-                                        .flatMap(pawn -> {
-                                            move.setNumber(getNumber(pawn.getGame()));
-                                            //TODO zapisz ruch i wyślij informacje do wszystkich
-                                            //TODO dodaj nr ruchu
-                                            return save(move)
-                                                    .map(firstMove -> {
-                                                        Move secondMove = new Move();
-                                                        secondMove.setPawn(pawn);
-                                                        secondMove.setDistance(0);
-                                                        secondMove.setOldLocation(pawn.getLocation());
-                                                        secondMove.setNewLocation(Location.getBase(pawn.getColor()));
-                                                        secondMove.setNumber(firstMove.getNumber() + 1);
-                                                        save(secondMove);
-                                                        //TODO stwórz ruch zbijający i zapisz i roześlij
-                                                        return firstMove;
-                                                    });
+                .map(pawn -> createMove(distance, pawn))
+                .map(this::doMove);
+    }
 
-                                        });
-                            }
-                        }));
+    private Move doMove(@NonNull Move move) {
+        return pawnService.getPawnInSameLocation(move)
+                .map(pawn -> {
+                    if (pawn.getColor() != move.getPawn().getColor()) {
+                        Move save = save(move);
+                        save(createMove(0, pawn));
+                        return save;
+                    } else {
+                        return null;
+                    }
+                })
+                .orElseGet(() -> save(move));
+    }
+
+    private Move createMove(int distance, @NonNull Pawn pawn) {
+        Move move = new Move();
+        move.setPawn(pawn);
+        move.setOldLocation(pawn.getLocation());
+        move.setNewLocation(pawn.getLocation().getLocationAfterMove(pawn.getColor(), distance));
+        move.setNumber(getNumberOfMoves(pawn.getGame()) + 1);
+        move.setDistance(distance);
+        return move;
+    }
+
+    private Move save(@NonNull Move move) {
+        move.setId(null);
+        //TODO zapisz ruch i wyślij informacje do wszystkich
+        return repository.save(move);
+    }
+
+    private int getNumberOfMoves(@NonNull Game game) {
+        return repository.countByPawnGame(game);
     }
 }
