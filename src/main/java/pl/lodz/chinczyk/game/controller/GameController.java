@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lodz.chinczyk.game.controller.mapper.GameMapper;
@@ -34,7 +36,7 @@ public class GameController {
                 .orElseGet(ResponseEntity.badRequest()::build);
     }
 
-    @GetMapping("/new")
+    @PostMapping("/new")
     @ApiOperation(value = "createGame")
     @ApiResponse(code = 200, message = "Return new Game", response = GameDTO.class)
     public ResponseEntity<GameDTO> createGame() {
@@ -54,7 +56,7 @@ public class GameController {
                 .orElseGet(ResponseEntity.notFound()::build);
     }
 
-    @GetMapping("/{gameId}/start")
+    @PutMapping("/{gameId}/start")
     @ApiOperation(value = "startGame")
     @ApiResponse(code = 200, message = "Start game and return game information", response = GameDTO.class)
     public ResponseEntity<GameDTO> startGame(@ApiParam(value = "Game id", required = true) @PathVariable @NonNull UUID gameId) {
