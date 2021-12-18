@@ -63,6 +63,6 @@ public class GameService {
                 .map(Game::getPlayers)
                 .filter(players -> players.stream().anyMatch(player -> player.getId() == playerId))
                 .map(players -> new Random().nextInt(5) + 1)
-                .orElse(-1);
+                .orElse(0);
     }
 }
