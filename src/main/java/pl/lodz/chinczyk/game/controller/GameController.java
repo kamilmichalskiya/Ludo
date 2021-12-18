@@ -68,7 +68,7 @@ public class GameController {
 
     @GetMapping("/{gameId}/player/{playerId}/dice")
     @ApiOperation(value = "rollDice")
-    @ApiResponse(code = 200, message = "Roll the dice for specific player in game and get value", response = GameDTO.class)
+    @ApiResponse(code = 200, message = "Roll the dice for specific player in game and get value", response = Integer.class)
     public ResponseEntity<Integer> rollDice(@ApiParam(value = "Game id", required = true) @PathVariable @NonNull UUID gameId,
                                             @ApiParam(value = "Player id", required = true) @PathVariable @NonNull UUID playerId) {
         return ResponseEntity.ok(service.rollDice(gameId, playerId));
