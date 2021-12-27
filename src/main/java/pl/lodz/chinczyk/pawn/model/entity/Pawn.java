@@ -2,8 +2,9 @@ package pl.lodz.chinczyk.pawn.model.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import pl.lodz.chinczyk.game.model.entity.Game;
-import pl.lodz.chinczyk.move.model.entity.Move;
 import pl.lodz.chinczyk.pawn.model.Color;
 import pl.lodz.chinczyk.pawn.model.Location;
 import pl.lodz.chinczyk.player.model.entity.Player;
@@ -13,29 +14,24 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import static javax.persistence.EnumType.STRING;
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
 @Entity
 public class Pawn {
-
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
+    @Type(type = "uuid-char")
     private UUID id;
     @Enumerated(STRING)
     private Color color;
     @Enumerated(STRING)
     private Location location;
-    @OneToMany(mappedBy = "pawn")
-    private Set<Move> moves = new HashSet<>();
     @ManyToOne(fetch = LAZY)
     private Game game;
     @ManyToOne(fetch = LAZY)

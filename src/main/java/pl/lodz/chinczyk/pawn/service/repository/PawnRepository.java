@@ -8,7 +8,7 @@ import pl.lodz.chinczyk.pawn.model.entity.Pawn;
 import java.util.List;
 import java.util.UUID;
 
-@Repository
+@Repository //TODO wyrzucenie adnotacji
 public interface PawnRepository extends JpaRepository<Pawn, UUID> {
     List<Pawn> findAllByGame(Game game);
 }
