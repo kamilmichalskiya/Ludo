@@ -30,41 +30,65 @@ public enum Location {
     }
 
     public static Location getBase(Color color) {
-        return switch (color) {
-            case RED -> R_BASE;
-            case GREEN -> G_BASE;
-            case BLUE -> B_BASE;
-            case YELLOW -> Y_BASE;
-            case NO_COLOR -> null;
-        };
+        switch (color) {
+            case RED:
+                return R_BASE;
+            case GREEN:
+                return G_BASE;
+            case BLUE:
+                return B_BASE;
+            case YELLOW:
+                return Y_BASE;
+            case NO_COLOR:
+                return null;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static Location getHome(@NonNull Color color) {
-        return switch (color) {
-            case RED -> R_HOME;
-            case GREEN -> G_HOME;
-            case BLUE -> B_HOME;
-            case YELLOW -> Y_HOME;
-            case NO_COLOR -> null;
-        };
+        switch (color) {
+            case RED:
+                return R_HOME;
+            case GREEN:
+                return G_HOME;
+            case BLUE:
+                return B_HOME;
+            case YELLOW:
+                return Y_HOME;
+            case NO_COLOR:
+                return null;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static Location getStartLocation(@NonNull Color color) {
-        return switch (color) {
-            case RED -> R_0;
-            case BLUE -> B_0;
-            case GREEN -> G_0;
-            case YELLOW -> Y_0;
-            case NO_COLOR -> null;
-        };
+        switch (color) {
+            case RED:
+                return R_0;
+            case BLUE:
+                return B_0;
+            case GREEN:
+                return G_0;
+            case YELLOW:
+                return Y_0;
+            case NO_COLOR:
+                return null;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public LocationType getType() {
-        return switch (this.placeNumber) {
-            case -2 -> BASE;
-            case -1 -> HOME;
-            default -> FIELD;
-        };
+        switch (this.placeNumber) {
+            case -2:
+                return BASE;
+            case -1:
+                return HOME;
+            default:
+                return FIELD;
+        }
     }
 
     public Location getLocationAfterMove(@NonNull Color colorOfPawn, int distance) {

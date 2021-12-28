@@ -6,12 +6,19 @@ public enum Color {
     RED, GREEN, BLUE, YELLOW, NO_COLOR;
 
     public static Color getNextColor(@NonNull Color color) {
-        return switch (color) {
-            case RED -> GREEN;
-            case GREEN -> BLUE;
-            case BLUE -> YELLOW;
-            case YELLOW -> RED;
-            case NO_COLOR -> NO_COLOR;
-        };
+        switch (color) {
+            case RED:
+                return GREEN;
+            case GREEN:
+                return BLUE;
+            case BLUE:
+                return YELLOW;
+            case YELLOW:
+                return RED;
+            case NO_COLOR:
+                return NO_COLOR;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }
