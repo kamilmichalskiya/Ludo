@@ -1,4 +1,4 @@
-package pl.lodz.chinczyk.pawn.model.controller;
+package pl.lodz.chinczyk.pawn.controller;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.lodz.chinczyk.pawn.model.controller.mapper.PawnMapper;
+import pl.lodz.chinczyk.pawn.controller.mapper.PawnMapper;
 import pl.lodz.chinczyk.pawn.model.dto.PawnDTO;
 import pl.lodz.chinczyk.pawn.service.PawnService;
 

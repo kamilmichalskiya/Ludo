@@ -1,4 +1,4 @@
-package pl.lodz.chinczyk.pawn.model.controller.mapper;
+package pl.lodz.chinczyk.pawn.controller.mapper;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;

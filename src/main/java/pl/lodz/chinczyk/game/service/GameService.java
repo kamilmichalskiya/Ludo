@@ -54,6 +54,7 @@ public class GameService {
                             .map(Player::getId)
                             .ifPresent(game::setNextPlayerId);
                     messageSender.updateGame(game);
+                    messageSender.updateListOfGames(game);
                     return game;
                 });
     }
