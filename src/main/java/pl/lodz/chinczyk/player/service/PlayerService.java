@@ -38,11 +38,11 @@ public class PlayerService {
                                     .orElseGet(() -> repository.save(new Player(nick))))
                                     .map(player -> {
                                         player.getGames().add(game);
-                                        messageSender.updateListOfGames(game);
                                         List<Pawn> pawnList = pawnService.createPawnsForGame(player, gameId);
                                         player.getPawns().addAll(pawnList);
                                         game.getPawns().addAll(pawnList);
                                         game.getPlayers().add(player);
+                                        messageSender.updateListOfGames(game);
                                         messageSender.updateGame(game);
                                         return repository.save(player);
                                     });
