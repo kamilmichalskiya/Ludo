@@ -9,8 +9,8 @@ function showLog(logBody) {
 }
 
 function createConnection() {
-    // client = Stomp.client("wss://for4chat.herokuapp.com/chat")
-    client = Stomp.client("ws://localhost:8080/queue")
+    client = Stomp.client("wss://chinczyk4.herokuapp.com:8080/queue");
+    // client = Stomp.client("ws://localhost:8080/queue");
     console.log('Stomp connect');
     client.connect({},
         function (frame) {
