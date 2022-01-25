@@ -26,7 +26,7 @@ function subscribe() {
         const body = JSON.parse(message.body);
         let logBody = "";
         logBody = logBody.concat("|| id: ", body.id);
-        logBody = logBody.concat( " || status: ", body.status);
+        logBody = logBody.concat(" || status: ", body.status);
         logBody = logBody.concat(" || players: ", body.players.length);
         logBody = logBody.concat(" || pawns: ", body.pawns.length);
         showLog(logBody);

@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import pl.lodz.chinczyk.game.model.dto.GameDTO;
-import pl.lodz.chinczyk.pawn.model.Location;
 import pl.lodz.chinczyk.pawn.model.dto.PawnDTO;
 import pl.lodz.chinczyk.player.model.dto.PlayerDTO;
 
@@ -27,8 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static pl.lodz.chinczyk.pawn.model.Color.GREEN;
 import static pl.lodz.chinczyk.pawn.model.Location.B_0;
-import static pl.lodz.chinczyk.pawn.model.Location.B_3;
-import static pl.lodz.chinczyk.pawn.model.Location.G_0;
 import static pl.lodz.chinczyk.pawn.model.Location.G_6;
 import static pl.lodz.chinczyk.pawn.model.Location.R_0;
 import static pl.lodz.chinczyk.pawn.model.Location.getStartLocation;
@@ -112,13 +109,43 @@ class ChinczykApplicationTests {
 
     @Order(7)
     @Test
-    void secondPlayerJoinGame() throws Exception {
+    void secondPlayerJoinGame1() throws Exception {
         MvcResult mvcResult = this.mockMvc.perform(put("/players/green/join/b2303e5a-eab6-4e9a-ad46-592075eeb676"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
         assertEquals("green", playerDTO.getNick());
+    }
+
+    @Order(7)
+    @Test
+    void secondPlayerJoinGame2() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(put("/players/blue/join/b2303e5a-eab6-4e9a-ad46-592075eeb676"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
+        assertEquals("blue", playerDTO.getNick());
+    }
+
+    @Order(7)
+    @Test
+    void secondPlayerJoinGame3() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(put("/players/yellow/join/b2303e5a-eab6-4e9a-ad46-592075eeb676"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
+        assertEquals("yellow", playerDTO.getNick());
+    }
+
+    @Order(7)
+    @Test
+    void secondPlayerJoinGame4() throws Exception {
+        this.mockMvc.perform(put("/players/red2/join/b2303e5a-eab6-4e9a-ad46-592075eeb676"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Order(8)
