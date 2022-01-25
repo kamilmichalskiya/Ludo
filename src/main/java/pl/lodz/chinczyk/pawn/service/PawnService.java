@@ -75,6 +75,7 @@ public class PawnService {
                     List<Pawn> possibleMoves = getPossibleMoves(selectedPawn.getGame().getId(), selectedPawn.getColor(), distance);
                     if (possibleMoves.isEmpty()) {
                         prepareGameForNextTurn(selectedPawn.getGame().getId(), distance, selectedPawn.getColor());
+                        messageSender.updateGame(selectedPawn.getGame());
                         return null;
                     } else if (possibleMoves.stream().noneMatch(pawn -> pawn.getId().equals(selectedPawn.getId()))) {
                         return null;
@@ -83,6 +84,7 @@ public class PawnService {
                         takePawn(move);
                         prepareGameForNextTurn(selectedPawn.getGame().getId(), distance, selectedPawn.getColor());
                         selectedPawn.setLocation(move.getNewLocation());
+                        messageSender.updateGame(selectedPawn.getGame());
                         return repository.save(selectedPawn);
                     }
                 });
@@ -118,7 +120,6 @@ public class PawnService {
                         }
                         game.setNextPlayerId(mapOfPlayersAndColors.get(nextColor));
                     }
-                    messageSender.updateGame(game);
                 });
     }
 

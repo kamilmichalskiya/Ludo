@@ -6,15 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.game.service.repository.GameRepository;
-import pl.lodz.chinczyk.pawn.model.Color;
-import pl.lodz.chinczyk.pawn.model.entity.Pawn;
-import pl.lodz.chinczyk.pawn.service.PawnService;
 import pl.lodz.chinczyk.player.model.entity.Player;
 import pl.lodz.chinczyk.websocket.MessageSender;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,6 +57,5 @@ public class GameService {
                     return game;
                 });
     }
-
 
 }
