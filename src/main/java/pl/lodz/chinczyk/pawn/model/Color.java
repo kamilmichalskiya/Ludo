@@ -3,7 +3,7 @@ package pl.lodz.chinczyk.pawn.model;
 import lombok.NonNull;
 
 public enum Color {
-    RED, GREEN, BLUE, YELLOW, NO_COLOR;
+    RED, GREEN, BLUE, YELLOW;
 
     public static Color getNextColor(@NonNull Color color) {
         switch (color) {
@@ -15,10 +15,8 @@ public enum Color {
                 return YELLOW;
             case YELLOW:
                 return RED;
-            case NO_COLOR:
-                return NO_COLOR;
             default:
-                throw new IllegalArgumentException();
+                return color;
         }
     }
 }

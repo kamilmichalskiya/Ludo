@@ -24,5 +24,6 @@ public interface PlayerMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id")
     @Mapping(target = "status")
+    @Mapping(target = "pawns")
     GameDTO gameToGameDTO(Game game);
 }

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import pl.lodz.chinczyk.game.controller.mapper.GameMapper;
 import pl.lodz.chinczyk.game.model.entity.Game;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class MessageSender {
@@ -20,5 +22,9 @@ public class MessageSender {
 
     public void updateGame(@NonNull Game game) {
         messagingTemplate.convertAndSend("/game/" + game.getId(), gameMapper.mapToDTO(game));
+    }
+
+    public void sendRollDiceInfo(UUID gameId, Integer distance) {
+        messagingTemplate.convertAndSend("/game/" + gameId, distance);
     }
 }

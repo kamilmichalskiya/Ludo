@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lodz.chinczyk.pawn.controller.mapper.PawnMapper;
 import pl.lodz.chinczyk.pawn.model.dto.PawnDTO;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = RequestMethod.PUT)
 @RequestMapping("/pawns")
 public class PawnController {
     private final PawnService service;
@@ -27,7 +28,7 @@ public class PawnController {
     @PutMapping("/{pawnId}/move/{distance}")
     @ApiOperation(value = "movePawn")
     @ApiResponse(code = 200, message = "Move pawn in game", response = PawnDTO.class)
-    public ResponseEntity<PawnDTO> movePawn(@PathVariable @NonNull UUID pawnId, @PathVariable @NonNull Integer distance) {
+    public ResponseEntity<PawnDTO> movePawn(@PathVariable @NonNull UUID pawnId, @PathVariable @NonNull int distance) {
         return service.movePawn(pawnId, distance)
                 .map(mapper::mapToDTO)
                 .map(ResponseEntity::ok)

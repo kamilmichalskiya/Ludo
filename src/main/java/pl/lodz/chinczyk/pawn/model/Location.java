@@ -29,52 +29,28 @@ public enum Location {
         this.color = color;
     }
 
-    public static Location getBase(Color color) {
-        switch (color) {
-            case RED:
-                return R_BASE;
-            case GREEN:
-                return G_BASE;
-            case BLUE:
-                return B_BASE;
-            case YELLOW:
-                return Y_BASE;
-            case NO_COLOR:
-                return null;
-            default:
-                throw new IllegalArgumentException();
-        }
+    public static Location getBase(@NonNull Color color) {
+        return getLocationForColor(color, R_BASE, G_BASE, B_BASE, Y_BASE);
     }
 
     public static Location getHome(@NonNull Color color) {
-        switch (color) {
-            case RED:
-                return R_HOME;
-            case GREEN:
-                return G_HOME;
-            case BLUE:
-                return B_HOME;
-            case YELLOW:
-                return Y_HOME;
-            case NO_COLOR:
-                return null;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return getLocationForColor(color, R_HOME, G_HOME, B_HOME, Y_HOME);
     }
 
     public static Location getStartLocation(@NonNull Color color) {
+        return getLocationForColor(color, R_0, G_0, B_0, Y_0);
+    }
+
+    private static Location getLocationForColor(Color color, Location rLocation, Location gLocation, Location bLocation, Location yLocation) {
         switch (color) {
             case RED:
-                return R_0;
-            case BLUE:
-                return B_0;
+                return rLocation;
             case GREEN:
-                return G_0;
+                return gLocation;
+            case BLUE:
+                return bLocation;
             case YELLOW:
-                return Y_0;
-            case NO_COLOR:
-                return null;
+                return yLocation;
             default:
                 throw new IllegalArgumentException();
         }

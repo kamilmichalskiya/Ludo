@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.game.service.GameService;
 import pl.lodz.chinczyk.pawn.model.Color;
-import pl.lodz.chinczyk.pawn.model.Location;
 import pl.lodz.chinczyk.pawn.model.Move;
 import pl.lodz.chinczyk.pawn.model.entity.Pawn;
 import pl.lodz.chinczyk.pawn.service.repository.PawnRepository;
@@ -20,13 +19,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static pl.lodz.chinczyk.game.model.GameStatus.DONE;
 import static pl.lodz.chinczyk.game.model.GameStatus.IN_PROGRESS;
-import static pl.lodz.chinczyk.pawn.model.Color.NO_COLOR;
 import static pl.lodz.chinczyk.pawn.model.Color.getNextColor;
 import static pl.lodz.chinczyk.pawn.model.Location.getBase;
 import static pl.lodz.chinczyk.pawn.model.Location.getHome;
@@ -70,36 +69,53 @@ public class PawnService {
                         .findFirst());
     }
 
-    @Transactional
     public Optional<Pawn> movePawn(@NonNull UUID pawnId, @NonNull Integer distance) {
-        return repository.findById(pawnId)
-                .filter(pawn -> pawn.getGame().getStatus() == IN_PROGRESS)
-                .filter(pawn -> pawn.getGame().getNextPlayerId() == pawn.getPlayer().getId())
-                .filter(pawn -> pawn.getLocation().getType() != HOME)
-                .filter(pawn -> !(pawn.getLocation().getType() == BASE && distance != 6))
-                .map(pawn -> {
-                    Move move = createMove(pawn, distance);
-                    pawn.setLocation(move.getNewLocation());
-                    doMove(move);
-                    prepareGameForNextTurn(pawn.getGame().getId(), distance, pawn.getColor());
-                    return pawn;
+        return getSelectedPawn(pawnId, distance)
+                .map(selectedPawn -> {
+                    List<Pawn> possibleMoves = getPossibleMoves(selectedPawn.getGame().getId(), selectedPawn.getColor(), distance);
+                    if (possibleMoves.isEmpty()) {
+                        prepareGameForNextTurn(selectedPawn.getGame().getId(), distance, selectedPawn.getColor());
+                        return null;
+                    } else if (possibleMoves.stream().noneMatch(pawn -> pawn.getId().equals(selectedPawn.getId()))) {
+                        return null;
+                    } else {
+                        Move move = createMove(selectedPawn, distance);
+                        takePawn(move);
+                        prepareGameForNextTurn(selectedPawn.getGame().getId(), distance, selectedPawn.getColor());
+                        selectedPawn.setLocation(move.getNewLocation());
+                        return repository.save(selectedPawn);
+                    }
                 });
     }
 
-    private void prepareGameForNextTurn(@NonNull UUID gameId, int distance, @NonNull Color currentColor) {
+    public List<Pawn> getPossibleMoves(UUID gameId, Color color, Integer distance) {
+        return repository.findAllByGameId(gameId).stream()
+                .filter(pawn -> pawn.getColor().equals(color))
+                .filter(pawn -> !pawn.getLocation().getType().equals(HOME))
+                .filter(pawn -> !(pawn.getLocation().getType().equals(BASE) && distance != 6))
+                .collect(Collectors.toList());
+    }
+
+    private Optional<Pawn> getSelectedPawn(UUID pawnId, Integer distance) {
+        return repository.findById(pawnId)
+                .filter(pawn -> pawn.getGame().getStatus().equals(IN_PROGRESS))
+                .filter(pawn -> pawn.getGame().getNextPlayerId().equals(pawn.getPlayer().getId()))
+                .filter(pawn -> distance >= 1 && distance <= 6);
+    }
+
+    @Transactional
+    public void prepareGameForNextTurn(@NonNull UUID gameId, int distance, @NonNull Color currentColor) {
         gameService.findById(gameId)
                 .ifPresent(game -> {
                     if (isGameDone(game.getPawns(), currentColor)) {
                         game.setStatus(DONE);
                     } else if (distance != 6) {
                         Map<Color, UUID> mapOfPlayersAndColors = game.getPlayers().stream()
-                                .collect(Collectors
-                                        .toMap(player -> player.getPawns().stream().findAny().map(Pawn::getColor).orElse(NO_COLOR),
-                                                Player::getId));
-                        Color nextColor;
-                        do {
-                            nextColor = getNextColor(currentColor);
-                        } while (!mapOfPlayersAndColors.containsKey(nextColor));
+                                .collect(Collectors.toMap(player -> player.getPawns().stream().findAny().map(Pawn::getColor).orElse(null), Player::getId));
+                        Color nextColor = getNextColor(currentColor);
+                        while (!mapOfPlayersAndColors.containsKey(nextColor)) {
+                            nextColor = getNextColor(nextColor);
+                        }
                         game.setNextPlayerId(mapOfPlayersAndColors.get(nextColor));
                     }
                     messageSender.updateGame(game);
@@ -109,7 +125,7 @@ public class PawnService {
     private boolean isGameDone(@NonNull Set<Pawn> pawns, @NonNull Color currentColor) {
         return pawns.stream()
                 .filter(pawn -> pawn.getColor() == currentColor)
-                .allMatch(pawn -> pawn.getLocation() == getHome(pawn.getColor()));
+                .allMatch(pawn -> pawn.getLocation() == getHome(currentColor));
     }
 
     private Move createMove(@NonNull Pawn pawn, int distance) {
@@ -121,12 +137,15 @@ public class PawnService {
         return move;
     }
 
-    private void doMove(@NonNull Move move) {
+    private void takePawn(@NonNull Move move) {
         getPawnsInSameLocation(move)
                 .ifPresent(pawnList -> pawnList.stream()
                         .filter(pawn -> pawn.getLocation() != getStartLocation(pawn.getColor()))
                         .filter(pawn -> pawn.getColor() != move.getPawn().getColor())
-                        .forEach(pawn -> pawn.setLocation(Location.getBase(pawn.getColor()))));
+                        .forEach(pawn -> {
+                            pawn.setLocation(getBase(pawn.getColor()));
+                            repository.save(pawn);
+                        }));
     }
 
     private Optional<List<Pawn>> getPawnsInSameLocation(@NonNull Move move) {
@@ -138,5 +157,20 @@ public class PawnService {
                         .filter(pawn -> pawn.getLocation().getType() != HOME)
                         .filter(pawn -> pawn.getLocation() == move.getNewLocation())
                         .collect(Collectors.toList()));
+    }
+
+    public Optional<List<UUID>> rollDice(@NonNull UUID gameId, @NonNull UUID playerId) {
+        final Color[] color = new Color[1];
+        return gameService.findById(gameId)
+                .map(game -> {
+                    color[0] = game.getPawns().stream().filter(pawn -> pawn.getPlayer().getId().equals(playerId)).findFirst().map(Pawn::getColor).orElse(null);
+                    return game.getNextPlayerId();
+                })
+                .filter(playerId::equals)
+                .map(nextPlayerId -> new Random().nextInt(6) + 1)
+                .map(distance -> {
+                    messageSender.sendRollDiceInfo(gameId, distance);
+                    return getPossibleMoves(gameId, color[0], distance).stream().map(Pawn::getId).collect(Collectors.toList());
+                });
     }
 }

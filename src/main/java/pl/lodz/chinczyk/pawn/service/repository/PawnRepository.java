@@ -11,4 +11,6 @@ import java.util.UUID;
 @Repository //TODO wyrzucenie adnotacji
 public interface PawnRepository extends JpaRepository<Pawn, UUID> {
     List<Pawn> findAllByGame(Game game);
+
+    List<Pawn> findAllByGameId(UUID gameId);
 }

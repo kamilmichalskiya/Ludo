@@ -26,6 +26,7 @@ public interface GameMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id")
     @Mapping(target = "nick")
+    @Mapping(target = "pawns")
     PlayerDTO playerToPlayerDTO(Player player);
 
     GameDTO mapToDTO(Game model);

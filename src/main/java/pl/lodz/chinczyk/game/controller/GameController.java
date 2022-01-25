@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.lodz.chinczyk.game.controller.mapper.GameMapper;
 import pl.lodz.chinczyk.game.model.dto.GameDTO;
 import pl.lodz.chinczyk.game.service.GameService;
+import pl.lodz.chinczyk.pawn.service.PawnService;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @RequestMapping("/games")
 public class GameController {
     private final GameService service;
+    private final PawnService pawnService;
     private final GameMapper mapper;
 
     @GetMapping
@@ -70,9 +72,12 @@ public class GameController {
 
     @GetMapping("/{gameId}/player/{playerId}/dice")
     @ApiOperation(value = "rollDice")
-    @ApiResponse(code = 200, message = "Roll the dice for specific player in game and get value", response = Integer.class)
-    public ResponseEntity<Integer> rollDice(@ApiParam(value = "Game id", required = true) @PathVariable @NonNull UUID gameId,
-                                            @ApiParam(value = "Player id", required = true) @PathVariable @NonNull UUID playerId) {
-        return ResponseEntity.ok(service.rollDice(gameId, playerId));
+    @ApiResponse(code = 200, message = "Roll the dice for specific player in game and get list of pawn that can be moved", response =
+            UUID.class, responseContainer = "List")
+    public ResponseEntity<List<UUID>> rollDice(@ApiParam(value = "Game id", required = true) @PathVariable @NonNull UUID gameId,
+                                               @ApiParam(value = "Player id", required = true) @PathVariable @NonNull UUID playerId) {
+        return pawnService.rollDice(gameId, playerId)
+                .map(ResponseEntity::ok)
+                .orElseGet(ResponseEntity.badRequest()::build);
     }
 }

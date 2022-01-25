@@ -21,5 +21,6 @@ public interface PawnMapper {
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id")
+    @Mapping(target = "nextPlayerId")
     GameDTO gameToGameDTO(Game game);
 }

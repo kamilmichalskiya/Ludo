@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.game.service.repository.GameRepository;
+import pl.lodz.chinczyk.pawn.model.Color;
+import pl.lodz.chinczyk.pawn.model.entity.Pawn;
+import pl.lodz.chinczyk.pawn.service.PawnService;
 import pl.lodz.chinczyk.player.model.entity.Player;
 import pl.lodz.chinczyk.websocket.MessageSender;
 
@@ -59,11 +62,5 @@ public class GameService {
                 });
     }
 
-    public int rollDice(@NonNull UUID gameId, @NonNull UUID playerId) {
-        return repository.findById(gameId)
-                .map(Game::getPlayers)
-                .filter(players -> players.stream().anyMatch(player -> player.getId() == playerId))
-                .map(players -> new Random().nextInt(5) + 1)
-                .orElse(0);
-    }
+
 }
