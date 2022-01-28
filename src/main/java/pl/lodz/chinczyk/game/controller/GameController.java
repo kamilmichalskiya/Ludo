@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.lodz.chinczyk.game.controller.mapper.GameMapper;
 import pl.lodz.chinczyk.game.model.dto.GameDTO;
+import pl.lodz.chinczyk.game.service.DeleteService;
 import pl.lodz.chinczyk.game.service.GameService;
 import pl.lodz.chinczyk.pawn.service.PawnService;
 
@@ -29,6 +30,7 @@ public class GameController {
     private final GameService service;
     private final PawnService pawnService;
     private final GameMapper mapper;
+    private final DeleteService deleteService;
 
     @GetMapping
     @ApiOperation(value = "getAllActiveGames")
@@ -79,5 +81,12 @@ public class GameController {
         return pawnService.rollDice(gameId, playerId)
                 .map(ResponseEntity::ok)
                 .orElseGet(ResponseEntity.badRequest()::build);
+    }
+
+    @GetMapping("/delete")
+    @ApiOperation(value = "delete")
+    @ApiResponse(code = 200, message = "delete")
+    public void delete(){
+        deleteService.delete();
     }
 }
