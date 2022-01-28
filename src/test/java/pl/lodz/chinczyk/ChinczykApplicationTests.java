@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import pl.lodz.chinczyk.game.model.dto.GameDTO;
 import pl.lodz.chinczyk.pawn.model.dto.PawnDTO;
-import pl.lodz.chinczyk.player.model.dto.PlayerDTO;
 
 import java.util.List;
 import java.util.UUID;
@@ -103,8 +102,8 @@ class ChinczykApplicationTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
-        assertEquals("red", playerDTO.getNick());
+        GameDTO gameDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GameDTO.class);
+        assertTrue(gameDTO.getPlayers().stream().anyMatch(dto -> dto.getNick().equals("red")));
     }
 
     @Order(7)
@@ -114,8 +113,8 @@ class ChinczykApplicationTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
-        assertEquals("green", playerDTO.getNick());
+        GameDTO gameDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GameDTO.class);
+        assertTrue(gameDTO.getPlayers().stream().anyMatch(dto -> dto.getNick().equals("green")));
     }
 
     @Order(7)
@@ -125,8 +124,8 @@ class ChinczykApplicationTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
-        assertEquals("blue", playerDTO.getNick());
+        GameDTO gameDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GameDTO.class);
+        assertTrue(gameDTO.getPlayers().stream().anyMatch(dto -> dto.getNick().equals("blue")));
     }
 
     @Order(7)
@@ -136,8 +135,8 @@ class ChinczykApplicationTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        PlayerDTO playerDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PlayerDTO.class);
-        assertEquals("yellow", playerDTO.getNick());
+        GameDTO gameDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GameDTO.class);
+        assertTrue(gameDTO.getPlayers().stream().anyMatch(dto -> dto.getNick().equals("yellow")));
     }
 
     @Order(7)

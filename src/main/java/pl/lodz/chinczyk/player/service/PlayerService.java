@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.game.service.GameService;
 import pl.lodz.chinczyk.pawn.model.entity.Pawn;
 import pl.lodz.chinczyk.pawn.service.PawnService;
@@ -27,16 +28,16 @@ public class PlayerService {
     private final MessageSender messageSender;
 
     @Transactional
-    public Optional<Player> joinGame(@NonNull String nick, @NonNull UUID gameId) {
+    public Optional<Game> joinGame(@NonNull String nick, @NonNull UUID gameId) {
         return gameService.findById(gameId)
                 .flatMap(game -> {
                     if (game.getStatus() == NEW || game.getStatus() == IN_PROGRESS) {
                         if (game.getPlayers().stream().map(Player::getNick).anyMatch(nick::equals)) {
-                            return repository.findByNick(nick);
+                            return repository.findByNick(nick).map(player -> game);
                         } else if (game.getStatus() == NEW && game.getPlayers().size() < 4) {
                             return Optional.of(repository.findByNick(nick)
                                     .orElseGet(() -> repository.save(new Player(nick))))
-                                    .map(player -> {
+                                    .flatMap(player -> {
                                         player.getGames().add(game);
                                         List<Pawn> pawnList = pawnService.createPawnsForGame(player, gameId);
                                         player.getPawns().addAll(pawnList);
@@ -44,7 +45,7 @@ public class PlayerService {
                                         game.getPlayers().add(player);
                                         messageSender.updateListOfGames(game);
                                         messageSender.updateGame(game);
-                                        return repository.save(player);
+                                        return Optional.of(repository.save(player)).map(player1 -> game);
                                     });
                         }
                     }

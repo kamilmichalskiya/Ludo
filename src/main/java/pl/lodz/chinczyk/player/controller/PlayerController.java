@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.lodz.chinczyk.player.controller.mapper.PlayerMapper;
-import pl.lodz.chinczyk.player.model.dto.PlayerDTO;
+import pl.lodz.chinczyk.game.controller.mapper.GameMapper;
+import pl.lodz.chinczyk.game.model.dto.GameDTO;
 import pl.lodz.chinczyk.player.service.PlayerService;
 
 import java.util.UUID;
@@ -23,13 +23,13 @@ import java.util.UUID;
 @RequestMapping("/players")
 public class PlayerController {
     private final PlayerService service;
-    private final PlayerMapper mapper;
+    private final GameMapper mapper;
 
     @PutMapping("/{nick}/join/{gameId}")
     @ApiOperation(value = "joinGame")
-    @ApiResponse(code = 200, message = "Return Player", response = PlayerDTO.class)
-    public ResponseEntity<PlayerDTO> joinGame(@ApiParam(value = "Player nick", required = true) @PathVariable @NonNull String nick,
-                                              @ApiParam(value = "Game id", required = true) @PathVariable @NonNull UUID gameId) {
+    @ApiResponse(code = 200, message = "Return joined game", response = GameDTO.class)
+    public ResponseEntity<GameDTO> joinGame(@ApiParam(value = "Player nick", required = true) @PathVariable @NonNull String nick,
+                                            @ApiParam(value = "Game id", required = true) @PathVariable @NonNull UUID gameId) {
         return service.joinGame(nick, gameId)
                 .map(mapper::mapToDTO)
                 .map(ResponseEntity::ok)
