@@ -17,6 +17,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/game")
-                .setHeartbeatValue(new long[]{1000, 1000});
+                .setHeartbeatValue(new long[]{20000, 20000});
     }
 }
