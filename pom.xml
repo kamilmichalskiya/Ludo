@@ -18,7 +18,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <frontend-src-dir>${project.basedir}/src/main/FE-chinczyk-master</frontend-src-dir>
+        <frontend-src-dir>${project.basedir}/src/main/FE</frontend-src-dir>
         <node.version>v14.17.0</node.version>
         <yarn.version>v1.16.0</yarn.version>
         <frontend-maven-plugin.version>1.7.6</frontend-maven-plugin.version>
