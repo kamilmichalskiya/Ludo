@@ -32,7 +32,7 @@ const GamesList = () => {
   const getAllActiveGames = async () => {
     setLoadingState(true);
     console.log('GameList: getAllActiveGames');
-    const response = await fetch('https://chinczyk4.herokuapp.com/games');
+    const response = await fetch('/games');
     const data = await response.json();
     setGamesList(data);
 
