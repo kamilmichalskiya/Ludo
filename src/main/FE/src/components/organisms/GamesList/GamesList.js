@@ -3,6 +3,7 @@ import GamesListItem from 'components/molecules/GamesListItem/GamesListItem';
 import { StyledList, StyledTitle, Wrapper } from './GamesList.styles';
 import Form from '../Form/Form';
 import { Redirect } from 'react-router-dom';
+import Stomp from 'stompjs';
 
 const GamesList = () => {
   const [gamesList, setGamesList] = useState([]);
@@ -12,10 +13,24 @@ const GamesList = () => {
   const [gameIndex, setGameIndex] = useState(0);
   const [userName, setUserName] = useState('');
   const [shouldRedirect, setRedirect] = useState(false);
+  let client = null;
+  let subscription = '';
 
   useEffect(() => {
     setLoadingState(true);
     getAllActiveGames();
+    if (!client) {
+      createConnection();
+    }
+
+    let i = 0;
+    while (!client.connected && i <= 10) {
+      setTimeout(100);
+      i++;
+    }
+    if (client.connected) {
+      subscribe('all');
+    }
   }, []);
 
   useEffect(() => {
@@ -37,6 +52,32 @@ const GamesList = () => {
     setGamesList(data);
 
     setLoadingState(false);
+  };
+
+  const createConnection = () => {
+    // client = Stomp.client('wss://chinczyk4.herokuapp.com/queue');
+    // client = Stomp.client("ws://localhost:8080/queue");
+    console.log(window.location.host);
+    client = Stomp.client("ws://"+window.location.host+"/queue");
+    console.log('Stomp connect');
+    client.connect(
+        {},
+        function (frame) {},
+        function (frame) {
+          createConnection();
+        }
+    );
+  };
+
+  const subscribe = (id = gameId) => {
+    subscription = client.subscribe('/game/' + id, (message) => {
+      console.log(`Websocket returned value: ${message}`);
+      // let logBody = '';
+      // logBody = logBody.concat('|| id: ', body.id);
+      // logBody = logBody.concat(' || status: ', body.status);
+      // logBody = logBody.concat(' || players: ', body.players.length);
+      // logBody = logBody.concat(' || pawns: ', body.pawns.length);
+    });
   };
 
   const createGameHandler = async () => {
@@ -80,6 +121,7 @@ const GamesList = () => {
       setGamesList((gamesList) => [...gamesList, data]);
       setGameIndex(index);
       setRedirect(true);
+      subscribe(data.gameId);
     } else {
       console.warn('Please provide username!');
     }
