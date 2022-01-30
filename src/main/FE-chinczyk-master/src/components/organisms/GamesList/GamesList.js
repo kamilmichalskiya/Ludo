@@ -32,7 +32,7 @@ const GamesList = () => {
   const getAllActiveGames = async () => {
     setLoadingState(true);
     console.log('GameList: getAllActiveGames');
-    const response = await fetch('/games');
+    const response = await fetch('/api/games');
     const data = await response.json();
     setGamesList(data);
 
@@ -44,7 +44,7 @@ const GamesList = () => {
       const requestOptions = {
         method: 'POST',
       };
-      const response = await fetch('/games/new', requestOptions);
+      const response = await fetch('/api/games/new', requestOptions);
       const data = await response.json();
       console.log('GamesList: CreateGameHandler: ', data);
       if (data.id) {
@@ -74,7 +74,7 @@ const GamesList = () => {
           nick: userName,
         },
       };
-      const response = await fetch(`/players/${userName}/join/${gameId}`, requestOptions);
+      const response = await fetch(`/api/players/${userName}/join/${gameId}`, requestOptions);
       const data = await response.json();
       console.log('GamesList: join game: ', data);
       setGamesList((gamesList) => [...gamesList, data]);
