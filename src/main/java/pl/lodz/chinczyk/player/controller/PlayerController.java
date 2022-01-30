@@ -20,7 +20,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/players")
+@RequestMapping("/api/players")
 public class PlayerController {
     private final PlayerService service;
     private final GameMapper mapper;

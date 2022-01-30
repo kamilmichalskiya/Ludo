@@ -25,7 +25,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/games")
+@RequestMapping("/api/games")
 public class GameController {
     private final GameService service;
     private final PawnService pawnService;
