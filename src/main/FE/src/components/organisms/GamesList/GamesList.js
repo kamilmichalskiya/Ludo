@@ -57,8 +57,12 @@ const GamesList = () => {
   const createConnection = () => {
     // client = Stomp.client('wss://chinczyk4.herokuapp.com/queue');
     // client = Stomp.client("ws://localhost:8080/queue");
-    console.log(window.location.host);
-    client = Stomp.client("ws://"+window.location.host+"/queue");
+    let path = "ws://";
+    if (window.location.protocol==="https:"){
+      path ="wss://"
+    }
+    path+=window.location.host;
+    client = Stomp.client(path + "/queue");
     console.log('Stomp connect');
     client.connect(
         {},
