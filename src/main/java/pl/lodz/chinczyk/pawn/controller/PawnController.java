@@ -19,8 +19,8 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = RequestMethod.PUT)
-@RequestMapping("/pawns")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+@RequestMapping("/api/pawns")
 public class PawnController {
     private final PawnService service;
     private final PawnMapper mapper;
