@@ -30,6 +30,7 @@ const GamesList = () => {
       i++;
     }
     if (client.connected) {
+      console.log('WebSocket connected!');
       subscribe('all');
     }
   }, []);
@@ -61,7 +62,6 @@ const GamesList = () => {
     const response = await fetch(path + '/api/games');
     const data = await response.json();
     setGamesList(data);
-
     setLoadingState(false);
   };
 
@@ -72,7 +72,11 @@ const GamesList = () => {
     if (window.location.protocol === 'https:') {
       path = 'wss://';
     }
-    path += window.location.host;
+    if (window.location.port === '3000') {
+      path += 'localhost:8080';
+    } else {
+      path += window.location.host;
+    }
     client = Stomp.client(path + '/queue');
     console.log('Stomp connect');
     client.connect(
