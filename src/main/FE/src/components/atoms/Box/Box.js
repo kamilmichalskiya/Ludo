@@ -11,7 +11,6 @@ const Box = (props) => {
   const [loadingState, setLoadingState] = useState(false);
 
   useEffect(() => {
-    // const pawnsArray = findPawnsToBeDisplayed();
     // console.log('Pawns Array in Box component: ', pawnsArray);
   }, []);
 
@@ -38,30 +37,30 @@ const Box = (props) => {
         if (props.id === value.location) {
           // FIXME - BASE fields
           setPawnsToBeDisplayed(value.color);
-          console.log('Pawn to be displayed: ', value.color, value.location, value.id);
+          console.log(`Pawn to be displayed: ', ${value.color}, ${value.location}, key: ${key}`);
         }
       }
     }
   };
 
-  const renderSwitch = (param) => {
-    switch (param) {
+  const renderSwitch = () => {
+    switch (pawnToBeDisplayed) {
       case 'YELLOW':
         return (
-          <YellowPawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />
+          <YellowPawn title={props.id} id={props.id} style={{ backgroundColor: 'darkyellow', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />
         );
-      case 'RED':
-        return <RedPawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
       case 'BLUE':
-        return <BluePawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <BluePawn title={props.id} id={props.id} style={{ backgroundColor: 'darkblue', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
       case 'GREEN':
-        return <GreenPawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <GreenPawn title={props.id} id={props.id} style={{ backgroundColor: 'darkgreen', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+      case 'RED':
+        return <RedPawn title={props.id} id={props.id} style={{ backgroundColor: 'darkred', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
       default:
         break;
     }
   };
 
-  return <StyledBox {...props}>{renderSwitch(pawnToBeDisplayed)}</StyledBox>;
+  return <StyledBox {...props}>{renderSwitch()}</StyledBox>;
 };
 
 export default Box;

@@ -28,12 +28,34 @@ const GamesBoard = ({ location: { state } }) => {
       } else {
         gameData?.players?.forEach((player) => {
           player.pawns.forEach((pawn) => {
+            if (pawn.location.endsWith('_BASE')) {
+              if (!isLocationTaken(`${pawn.location}_1`, player)) {
+                pawn.location = `${pawn.location}_1`;
+              } else if (!isLocationTaken(`${pawn.location}_2`, player)) {
+                pawn.location = `${pawn.location}_2`;
+              } else if (!isLocationTaken(`${pawn.location}_3`, player)) {
+                pawn.location = `${pawn.location}_3`;
+              } else if (!isLocationTaken(`${pawn.location}_4`, player)) {
+                pawn.location = `${pawn.location}_4`;
+              }
+            }
             pawns[pawn.id] = { color: pawn.color, location: pawn.location };
           });
         });
       }
       setPawnsObject(pawns);
     }
+  };
+
+  const isLocationTaken = (location, player) => {
+    let isLocationTaken = false;
+    player.pawns.forEach((pawn) => {
+      if (pawn.location === location) {
+        console.log('Pawn assignment to base: ', location, pawn.location);
+        isLocationTaken = true;
+      }
+    });
+    return isLocationTaken;
   };
 
   console.log('GameBoard initialize params: ', state);
@@ -46,8 +68,8 @@ const GamesBoard = ({ location: { state } }) => {
         <br />
         <h1>{isLoading ? 'Loading...' : ''}</h1>
         <StyledRow>
-          <Box type="N" color="yellow" id="Y_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="yellow" id="Y_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="yellow" id="Y_BASE_1" pawnsArray={pawnsObject} />
+          <Box type="N" color="yellow" id="Y_BASE_2" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
           <Box type="N" color="white" id="Y_8" pawnsArray={pawnsObject} />
@@ -55,13 +77,13 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="red" id="R_0" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
-          <Box type="N" color="red" id="R_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="red" id="R_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="red" id="R_BASE_1" pawnsArray={pawnsObject} />
+          <Box type="N" color="red" id="R_BASE_2" pawnsArray={pawnsObject} />
         </StyledRow>
 
         <StyledRow>
-          <Box type="N" color="yellow" id="Y_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="yellow" id="Y_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="yellow" id="Y_BASE_3" pawnsArray={pawnsObject} />
+          <Box type="N" color="yellow" id="Y_BASE_4" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
           <Box type="N" color="white" id="Y_7" pawnsArray={pawnsObject} />
@@ -69,8 +91,8 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="white" id="R_1" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
-          <Box type="N" color="red" id="R_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="red" id="R_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="red" id="R_BASE_3" pawnsArray={pawnsObject} />
+          <Box type="N" color="red" id="R_BASE_4" pawnsArray={pawnsObject} />
         </StyledRow>
 
         <StyledRow>
@@ -174,8 +196,8 @@ const GamesBoard = ({ location: { state } }) => {
         </StyledRow>
 
         <StyledRow>
-          <Box type="N" color="blue" id="B_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="blue" id="B_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="blue" id="B_BASE_1" pawnsArray={pawnsObject} />
+          <Box type="N" color="blue" id="B_BASE_2" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
           <Box type="N" color="white" id="B_1" pawnsArray={pawnsObject} />
@@ -183,13 +205,13 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="white" id="G_7" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
-          <Box type="N" color="green" id="G_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="green" id="G_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="green" id="G_BASE_1" pawnsArray={pawnsObject} />
+          <Box type="N" color="green" id="G_BASE_2" pawnsArray={pawnsObject} />
         </StyledRow>
 
         <StyledRow>
-          <Box type="N" color="blue" id="B_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="blue" id="B_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="blue" id="B_BASE_3" pawnsArray={pawnsObject} />
+          <Box type="N" color="blue" id="B_BASE_4" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
           <Box type="N" color="blue" id="B_0" pawnsArray={pawnsObject} />
@@ -197,8 +219,8 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="white" id="G_9" pawnsArray={pawnsObject} />
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
-          <Box type="N" color="green" id="G_BASE" pawnsArray={pawnsObject} />
-          <Box type="N" color="green" id="G_BASE" pawnsArray={pawnsObject} />
+          <Box type="N" color="green" id="G_BASE_3" pawnsArray={pawnsObject} />
+          <Box type="N" color="green" id="G_BASE_4" pawnsArray={pawnsObject} />
         </StyledRow>
       </Wrapper>
     </>
