@@ -2,9 +2,10 @@ import styled from 'styled-components';
 
 export const Wrapper = styled.div`
   margin: 25px;
-  background-color: ${({ theme }) => theme.colors.white};
+  background-color: #36474f;
   width: 100%;
   height: 100vh;
+  min-height: 800px;
   max-width: 1600px;
   padding: 40px 50px;
   border-radius: 25px;
@@ -26,4 +27,12 @@ export const StyledRow = styled.div`
   display: flex;
   width: 100%;
   justify-content: center;
+  background-color: white;
+`;
+
+export const StyledNavigation = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  background-color: #3ea3f5;
+  border-radius: 15px;
 `;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ReactComponent as YellowPawn } from 'assets/icons/yellow_pawn.svg';
-import { ReactComponent as RedPawn } from 'assets/icons/red_pawn.svg';
-import { ReactComponent as BluePawn } from 'assets/icons/blue_pawn.svg';
-import { ReactComponent as GreenPawn } from 'assets/icons/green_pawn.svg';
-import { StyledBox } from './Box.styles';
+import YellowPawn from 'assets/icons/yellow_pawn.svg';
+import RedPawn from 'assets/icons/red_pawn.svg';
+import BluePawn from 'assets/icons/blue_pawn.svg';
+import GreenPawn from 'assets/icons/green_pawn.svg';
+import { StyledBox, Icon } from './Box.styles';
 
 const Box = (props) => {
   const [pawnsObject, setPawnsArray] = useState(props.pawnsArray);
@@ -46,15 +46,13 @@ const Box = (props) => {
   const renderSwitch = () => {
     switch (pawnToBeDisplayed) {
       case 'YELLOW':
-        return (
-          <YellowPawn title={props.id} id={props.id} style={{ backgroundColor: 'darkyellow', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />
-        );
+        return <Icon src={YellowPawn} alt="YellowPawn" title={props.id} id={props.id} />;
       case 'BLUE':
-        return <BluePawn title={props.id} id={props.id} style={{ backgroundColor: 'darkblue', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <Icon src={BluePawn} alt="BluePawn" title={props.id} id={props.id} />;
       case 'GREEN':
-        return <GreenPawn title={props.id} id={props.id} style={{ backgroundColor: 'darkgreen', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <Icon src={GreenPawn} alt="GreenPawn" title={props.id} id={props.id} />;
       case 'RED':
-        return <RedPawn title={props.id} id={props.id} style={{ backgroundColor: 'darkred', width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <Icon src={RedPawn} alt="RedPawn" title={props.id} id={props.id} />;
       default:
         break;
     }

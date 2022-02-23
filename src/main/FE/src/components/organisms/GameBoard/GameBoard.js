@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Box from 'components/atoms/Box/Box';
-import { Wrapper, StyledRow } from './GameBoard.styles';
+import { PrimaryButton } from 'components/atoms/Button/Button';
+import { Wrapper, StyledRow, StyledNavigation } from './GameBoard.styles';
 import { Link } from 'react-router-dom';
+import Dice from 'react-dice-roll';
 
 const GamesBoard = ({ location: { state } }) => {
   const [isLoading, setLoadingState] = useState(true);
@@ -58,15 +60,27 @@ const GamesBoard = ({ location: { state } }) => {
     return isLocationTaken;
   };
 
+  const startGame = () => {
+    console.log('Start Game!');
+  };
+
   console.log('GameBoard initialize params: ', state);
 
   return (
     <>
       <Wrapper>
-        <Link to="/">Home Page</Link>
-        <br />
-        <br />
         <h1>{isLoading ? 'Loading...' : ''}</h1>
+        <div>
+          
+        </div>
+        <StyledNavigation>
+          <PrimaryButton onClick={startGame}>Start Game!</PrimaryButton>
+          <PrimaryButton onClick={startGame}>Roll Dice!</PrimaryButton>
+          <Link to="/">
+            <PrimaryButton>Leave Game :c</PrimaryButton>
+          </Link>
+        </StyledNavigation>
+        <br /> <br />
         <StyledRow>
           <Box type="N" color="yellow" id="Y_BASE_1" pawnsArray={pawnsObject} />
           <Box type="N" color="yellow" id="Y_BASE_2" pawnsArray={pawnsObject} />
@@ -80,7 +94,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="red" id="R_BASE_1" pawnsArray={pawnsObject} />
           <Box type="N" color="red" id="R_BASE_2" pawnsArray={pawnsObject} />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" color="yellow" id="Y_BASE_3" pawnsArray={pawnsObject} />
           <Box type="N" color="yellow" id="Y_BASE_4" pawnsArray={pawnsObject} />
@@ -94,7 +107,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="red" id="R_BASE_3" pawnsArray={pawnsObject} />
           <Box type="N" color="red" id="R_BASE_4" pawnsArray={pawnsObject} />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
@@ -108,7 +120,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
@@ -122,7 +133,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
         </StyledRow>
-
         {/* Middle Section */}
         <StyledRow>
           <Box type="N" color="yellow" id="Y_0" pawnsArray={pawnsObject} />
@@ -137,21 +147,19 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="white" id="R_7" pawnsArray={pawnsObject} />
           <Box type="N" color="white" id="R_8" pawnsArray={pawnsObject} />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" color="white" id="B_9" pawnsArray={pawnsObject} />
           <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} />
-          <Box type="N" visibility="hidden" />
+          <Dice size="50" placement="top-right" style={{ margin: '50px' }}></Dice>
           <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} />
           <Box type="N" color="white" id="R_9" pawnsArray={pawnsObject} />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" color="white" id="B_8" pawnsArray={pawnsObject} />
           <Box type="N" color="white" id="B_7" pawnsArray={pawnsObject} />
@@ -165,7 +173,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="white" id="G_1" pawnsArray={pawnsObject} />
           <Box type="N" color="green" id="G_0" pawnsArray={pawnsObject} />
         </StyledRow>
-
         {/* Lower Section */}
         <StyledRow>
           <Box type="N" visibility="hidden" />
@@ -180,7 +187,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
@@ -194,7 +200,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" visibility="hidden" />
           <Box type="N" visibility="hidden" />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" color="blue" id="B_BASE_1" pawnsArray={pawnsObject} />
           <Box type="N" color="blue" id="B_BASE_2" pawnsArray={pawnsObject} />
@@ -208,7 +213,6 @@ const GamesBoard = ({ location: { state } }) => {
           <Box type="N" color="green" id="G_BASE_1" pawnsArray={pawnsObject} />
           <Box type="N" color="green" id="G_BASE_2" pawnsArray={pawnsObject} />
         </StyledRow>
-
         <StyledRow>
           <Box type="N" color="blue" id="B_BASE_3" pawnsArray={pawnsObject} />
           <Box type="N" color="blue" id="B_BASE_4" pawnsArray={pawnsObject} />
