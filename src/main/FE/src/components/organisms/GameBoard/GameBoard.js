@@ -85,8 +85,8 @@ const GamesBoard = ({ location: { state } }) => {
         <StyledGameBoardContainer>
           <StyledRow>
             <HeaderSection>
-              <Label>Player 1</Label>
-              <Label>Player 2</Label>
+              <Label>{gameData?.players[3]?.nick || 'Player 4'}</Label>
+              <Label>{gameData?.players[0]?.nick || 'Player 1'}</Label>
             </HeaderSection>
           </StyledRow>
           <StyledRow>
@@ -236,8 +236,8 @@ const GamesBoard = ({ location: { state } }) => {
           </StyledRow>
           <StyledRow>
             <HeaderSection>
-              <Label>Player 3</Label>
-              <Label>Player 4</Label>
+              <Label>{gameData?.players[1]?.nick || 'Player 2'}</Label>
+              <Label>{gameData?.players[2]?.nick || 'Player 3'}</Label>
             </HeaderSection>
           </StyledRow>
         </StyledGameBoardContainer>

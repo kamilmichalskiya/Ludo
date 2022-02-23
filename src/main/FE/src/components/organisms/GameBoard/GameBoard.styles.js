@@ -3,10 +3,9 @@ import styled from 'styled-components';
 export const Wrapper = styled.div`
   background-color: #36474f;
   width: 100%;
-  height: 100vh;
-  min-height: 800px;
+  min-height: 100vh;
   max-width: 1600px;
-  padding: 40px 50px;
+  padding: 10px 50px;
   box-shadow: 0 5px 15px -10px rgba(0, 0, 0, 0.3);
 `;
 
