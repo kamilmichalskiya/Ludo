@@ -15,3 +15,13 @@ export const StyledBox = styled.div`
   box-shadow: 0 5px 15px -10px rgba(0, 0, 0, 0.3);
   background-image: url('../../../assets/photos/czinczin.png');
 `;
+
+export const Icon = styled.img`
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  left: 0;
+  right: 0;
+  transform: scale(70%);
+  cursor: pointer;
+`;

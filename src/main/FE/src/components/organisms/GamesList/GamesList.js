@@ -8,12 +8,13 @@ import Stomp from 'stompjs';
 const GamesList = () => {
   const [gamesList, setGamesList] = useState([]);
   const [isLoading, setLoadingState] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [gameId, setGameId] = useState('');
   const [gameIndex, setGameIndex] = useState(0);
   const [userName, setUserName] = useState('');
   const [shouldRedirect, setRedirect] = useState(false);
+  const [activeGame, setActiveGame] = useState({});
   let client = null;
+  // eslint-disable-next-line no-unused-vars
   let subscription = '';
 
   useEffect(() => {
@@ -21,15 +22,6 @@ const GamesList = () => {
     getAllActiveGames();
     if (!client) {
       createConnection();
-    }
-
-    let i = 0;
-    while (!client.connected && i <= 10) {
-      setTimeout(100);
-      i++;
-    }
-    if (client.connected) {
-      subscribe('all');
     }
   }, []);
 
@@ -44,40 +36,51 @@ const GamesList = () => {
     }
   }, [gamesList]);
 
+  useEffect(() => {
+    if (activeGame && Object.keys(activeGame).length !== 0) {
+      setRedirect(true);
+    }
+  }, [activeGame]);
+
   const getAllActiveGames = async () => {
     setLoadingState(true);
     console.log('GameList: getAllActiveGames');
     let path = '';
-    if(window.location.port==='3000'){
-      path='http://localhost:8080';
+    if (window.location.port === '3000') {
+      path = 'http://localhost:8080';
     }
-    const response = await fetch(path+'/api/games');
+    const response = await fetch(path + '/api/games');
     const data = await response.json();
     setGamesList(data);
-
     setLoadingState(false);
   };
 
-  const createConnection = () => {
+  const createConnection = (id = "all") => {
     // client = Stomp.client('wss://chinczyk4.herokuapp.com/queue');
     // client = Stomp.client("ws://localhost:8080/queue");
-    let path = "ws://";
-    if (window.location.protocol==="https:"){
-      path ="wss://"
+    let path = 'ws://';
+    if (window.location.protocol === 'https:') {
+      path = 'wss://';
     }
-    path+=window.location.host;
-    client = Stomp.client(path + "/queue");
+    if (window.location.port === '3000') {
+      path += 'localhost:8080';
+    } else {
+      path += window.location.host;
+    }
+    client = Stomp.client(path + '/queue');
     console.log('Stomp connect');
     client.connect(
-        {},
-        function (frame) {},
-        function (frame) {
-          createConnection();
-        }
+      {},
+      function (frame) {
+        subscribe(id);
+      },
+      function (frame) {
+        createConnection();
+      }
     );
   };
 
-  const subscribe = (id = gameId) => {
+  const subscribe = (id = 'all') => {
     subscription = client.subscribe('/game/' + id, (message) => {
       console.log(`Websocket returned value: ${message}`);
       // let logBody = '';
@@ -94,10 +97,10 @@ const GamesList = () => {
         method: 'POST',
       };
       let path = '';
-      if(window.location.port==='3000'){
-        path='http://localhost:8080';
+      if (window.location.port === '3000') {
+        path = 'http://localhost:8080';
       }
-      const response = await fetch(path+'/api/games/new', requestOptions);
+      const response = await fetch(path + '/api/games/new', requestOptions);
       const data = await response.json();
       console.log('GamesList: CreateGameHandler: ', data);
       if (data.id) {
@@ -128,31 +131,32 @@ const GamesList = () => {
         },
       };
       let path = '';
-      if(window.location.port==='3000'){
-        path='http://localhost:8080';
+      if (window.location.port === '3000') {
+        path = 'http://localhost:8080';
       }
-      const response = await fetch(path+`/api/players/${userName}/join/${gameId}`, requestOptions);
+      const response = await fetch(path + `/api/players/${userName}/join/${gameId}`, requestOptions);
       const data = await response.json();
       console.log('GamesList: join game: ', data);
-      setGamesList((gamesList) => [...gamesList, data]);
+      // setGamesList((gamesList) => [...gamesList, data]);
+      data.userName = userName;
+      setActiveGame(data);
       setGameIndex(index);
       setRedirect(true);
-      subscribe(data.gameId);
-    } else {
+      createConnection(data.id);
+    } else if (!userName) {
       console.warn('Please provide username!');
     }
   };
 
   const handleInputChange = (e) => {
     if (e.target.value) {
-      console.log(e.target.value);
       setUserName(e.target.value);
     }
   };
 
   return (
     <>
-      {shouldRedirect ? <Redirect push to={{ pathname: '/game-board', state: gamesList[gameIndex] }} /> : null}
+      {shouldRedirect ? <Redirect push to={{ pathname: '/game-board', state: activeGame }} /> : null}
       <Wrapper>
         <StyledTitle>Welcome to the Lugo Game!</StyledTitle>
         <StyledList>
