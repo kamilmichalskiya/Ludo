@@ -23,16 +23,6 @@ const GamesList = () => {
     if (!client) {
       createConnection();
     }
-
-    let i = 0;
-    while (!client.connected && i <= 10) {
-      setTimeout(100);
-      i++;
-    }
-    if (client.connected) {
-      console.log('WebSocket connected!');
-      subscribe('all');
-    }
   }, []);
 
   useEffect(() => {
@@ -65,7 +55,7 @@ const GamesList = () => {
     setLoadingState(false);
   };
 
-  const createConnection = () => {
+  const createConnection = (id = "all") => {
     // client = Stomp.client('wss://chinczyk4.herokuapp.com/queue');
     // client = Stomp.client("ws://localhost:8080/queue");
     let path = 'ws://';
@@ -81,14 +71,16 @@ const GamesList = () => {
     console.log('Stomp connect');
     client.connect(
       {},
-      function (frame) {},
+      function (frame) {
+        subscribe(id);
+      },
       function (frame) {
         createConnection();
       }
     );
   };
 
-  const subscribe = (id = gameId) => {
+  const subscribe = (id = 'all') => {
     subscription = client.subscribe('/game/' + id, (message) => {
       console.log(`Websocket returned value: ${message}`);
       // let logBody = '';
@@ -150,7 +142,7 @@ const GamesList = () => {
       setActiveGame(data);
       setGameIndex(index);
       setRedirect(true);
-      subscribe(data.id);
+      createConnection(data.id);
     } else if (!userName) {
       console.warn('Please provide username!');
     }
