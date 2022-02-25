@@ -25,6 +25,6 @@ public class MessageSender {
     }
 
     public void sendRollDiceInfo(UUID gameId, Integer distance) {
-        messagingTemplate.convertAndSend("/game/" + gameId, distance);
+        messagingTemplate.convertAndSend("/roll/" + gameId, distance);
     }
 }
