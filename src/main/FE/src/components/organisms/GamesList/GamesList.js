@@ -20,9 +20,6 @@ const GamesList = () => {
   useEffect(() => {
     setLoadingState(true);
     getAllActiveGames();
-    if (!client) {
-      createConnection();
-    }
   }, []);
 
   useEffect(() => {
@@ -42,6 +39,14 @@ const GamesList = () => {
     }
   }, [activeGame]);
 
+  useEffect(() => {
+    createConnection();
+    if (gamesList.length !== 0) {
+      setGamesList(gamesList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gamesList]);
+
   const getAllActiveGames = async () => {
     setLoadingState(true);
     console.log('GameList: getAllActiveGames');
@@ -55,7 +60,7 @@ const GamesList = () => {
     setLoadingState(false);
   };
 
-  const createConnection = (id = "all") => {
+  const createConnection = (id = 'all') => {
     // client = Stomp.client('wss://chinczyk4.herokuapp.com/queue');
     // client = Stomp.client("ws://localhost:8080/queue");
     let path = 'ws://';
@@ -63,7 +68,8 @@ const GamesList = () => {
       path = 'wss://';
     }
     if (window.location.port === '3000') {
-      path += 'localhost:8080';
+      // path += 'localhost:8080';
+      return; // clear console errors for FE development
     } else {
       path += window.location.host;
     }
@@ -81,13 +87,15 @@ const GamesList = () => {
   };
 
   const subscribe = (id = 'all') => {
-    subscription = client.subscribe('/game/' + id, (message) => {
-      console.log(`Websocket returned value: ${message}`);
-      // let logBody = '';
-      // logBody = logBody.concat('|| id: ', body.id);
-      // logBody = logBody.concat(' || status: ', body.status);
-      // logBody = logBody.concat(' || players: ', body.players.length);
-      // logBody = logBody.concat(' || pawns: ', body.pawns.length);
+    client.subscribe('/game/' + id, (message) => {
+      if (message) {
+        console.log(`Websocket returned value: ${message}`);
+        if (gamesList.length !== 0) {
+          const newGamesList = [...gamesList];
+          newGamesList.push(JSON.parse(message.body));
+          setGamesList(newGamesList);
+        }
+      }
     });
   };
 
@@ -142,7 +150,7 @@ const GamesList = () => {
       setActiveGame(data);
       setGameIndex(index);
       setRedirect(true);
-      createConnection(data.id);
+      // createConnection(data.id);
     } else if (!userName) {
       console.warn('Please provide username!');
     }
