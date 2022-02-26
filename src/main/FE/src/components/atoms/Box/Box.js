@@ -21,9 +21,6 @@ const Box = (props) => {
   useEffect(() => {
     if (pawnsObject) {
       findPawnsToBeDisplayed();
-      if (pawnsObject) {
-        console.log('Pawns Object in Box component: ', pawnsObject);
-      }
     }
   }, [pawnsObject]);
 

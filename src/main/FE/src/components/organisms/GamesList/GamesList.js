@@ -13,9 +13,9 @@ const GamesList = () => {
   const [userName, setUserName] = useState('');
   const [shouldRedirect, setRedirect] = useState(false);
   const [activeGame, setActiveGame] = useState({});
-  let client = null;
-  // eslint-disable-next-line no-unused-vars
-  let subscription = '';
+  const [websocket, setWebSocket] = useState(null);
+  const [clientConnection, setClientConnection] = useState(null);
+  let client = '';
 
   useEffect(() => {
     setLoadingState(true);
@@ -24,12 +24,12 @@ const GamesList = () => {
 
   useEffect(() => {
     setLoadingState(false);
-    console.log('GameBoard: isLoading', isLoading);
+    console.log('DEBUG: GameBoard: isLoading', isLoading);
   }, [isLoading]);
 
   useEffect(() => {
     if (gamesList?.length !== 0) {
-      console.log('GamesList: gamesList param state updated:', gamesList);
+      console.log('DEBUG: GamesList: gamesList param state updated:', gamesList);
     }
   }, [gamesList]);
 
@@ -47,9 +47,15 @@ const GamesList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gamesList]);
 
+  useEffect(() => {
+    if (gameIndex > 0) {
+      joinGame(gameId, gameIndex);
+    }
+  }, [gameIndex]);
+
   const getAllActiveGames = async () => {
     setLoadingState(true);
-    console.log('GameList: getAllActiveGames');
+    console.log('DEBUG: GameList: getAllActiveGames');
     let path = '';
     if (window.location.port === '3000') {
       path = 'http://localhost:8080';
@@ -74,7 +80,8 @@ const GamesList = () => {
       path += window.location.host;
     }
     client = Stomp.client(path + '/queue');
-    console.log('Stomp connect');
+    setClientConnection(client)
+    console.log('DEBUG: Stomp connect');
     client.connect(
       {},
       function (frame) {
@@ -87,16 +94,34 @@ const GamesList = () => {
   };
 
   const subscribe = (id = 'all') => {
-    client.subscribe('/game/' + id, (message) => {
+    const client2 = client ? client : clientConnection;
+    const subscription = client2.subscribe('/game/' + id, (message) => {
       if (message) {
-        console.log(`Websocket returned value: ${message}`);
+        console.log(`DEBUG: Websocket returned value: ${message}`);
         if (gamesList.length !== 0) {
           const newGamesList = [...gamesList];
-          newGamesList.push(JSON.parse(message.body));
+          const newGame = JSON.parse(message.body)
+          for (const game of newGamesList) {
+            if (game.id === newGame.id) {
+              newGamesList[game] = newGame;
+              setGamesList(newGamesList);
+              return;
+            }
+          }
+          newGamesList.push(newGame);
           setGamesList(newGamesList);
         }
       }
     });
+    if (subscription) {
+      setWebSocket(subscription);
+      console.log(`DEBUG: GamesList: subscribe w/ ${id}`);
+    }
+  };
+
+  const unsubscribe = () => {
+    websocket.unsubscribe();
+    console.log('DEBUG: GamesList: unsubscribe');
   };
 
   const createGameHandler = async () => {
@@ -110,7 +135,7 @@ const GamesList = () => {
       }
       const response = await fetch(path + '/api/games/new', requestOptions);
       const data = await response.json();
-      console.log('GamesList: CreateGameHandler: ', data);
+      console.log('DEBUG: GamesList: CreateGameHandler: ', data);
       if (data.id) {
         setGameId(data.id);
         setGameIndex(gamesList.length);
@@ -122,15 +147,9 @@ const GamesList = () => {
     }
   };
 
-  useEffect(() => {
-    if (gameIndex > 0) {
-      joinGame(gameId, gameIndex);
-    }
-  }, [gameIndex]);
-
   const joinGame = async (gameId, index = gameIndex) => {
     if (userName && gameId) {
-      console.log(`GamesList: joinGame with gameId: ${gameId}`);
+      console.log(`DEBUG: GamesList: joinGame with gameId: ${gameId}`);
       const requestOptions = {
         method: 'PUT',
         body: {
@@ -144,11 +163,13 @@ const GamesList = () => {
       }
       const response = await fetch(path + `/api/players/${userName}/join/${gameId}`, requestOptions);
       const data = await response.json();
-      console.log('GamesList: join game: ', data);
+      console.log('DEBUG: GamesList: join game: ', data);
       // setGamesList((gamesList) => [...gamesList, data]);
       data.userName = userName;
       setActiveGame(data);
       setGameIndex(index);
+      // unsubscribe();
+      subscribe(data.id);
       setRedirect(true);
       // createConnection(data.id);
     } else if (!userName) {
@@ -164,7 +185,7 @@ const GamesList = () => {
 
   return (
     <>
-      {shouldRedirect ? <Redirect push to={{ pathname: '/game-board', state: activeGame }} /> : null}
+      {shouldRedirect ? <Redirect push to={{ pathname: '/game-board', state: { activeGame, playerName: userName } }} /> : null}
       <Wrapper>
         <StyledTitle>Welcome to the Lugo Game!</StyledTitle>
         <StyledList>

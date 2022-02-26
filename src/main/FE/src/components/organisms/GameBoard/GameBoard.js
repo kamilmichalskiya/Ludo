@@ -8,18 +8,39 @@ import Dice from 'react-dice-roll';
 
 const GamesBoard = ({ location: { state } }) => {
   const [isLoading, setLoadingState] = useState(true);
-  const [gameData, setGameData] = useState(state);
+  const [gameData, setGameData] = useState(state.activeGame);
+  const [playerInfo, setPlayerInfo] = useState({ playerName: state.playerName, playerId: null, isHisTurn: false, diceResult: 0, moveablePawns: [] });
   const [pawnsObject, setPawnsObject] = useState({});
 
   useEffect(() => {
     loadPawns();
+    setPlayerId();
     setLoadingState(false);
-    console.log('GameBoard: isLoading', isLoading);
+    console.log('DEBUG: GameBoard: isLoading', isLoading);
   }, []);
 
   useEffect(() => {
-    console.log('Pawns Object updated!', pawnsObject);
+    console.log('DEBUG: GameBoard: Pawns Object updated!', pawnsObject);
   }, [pawnsObject]);
+
+  const setPlayerId = () => {
+    if (gameData && gameData?.players?.length !== 0 && playerInfo?.playerName) {
+      const { players } = gameData;
+      for (const player of players) {
+        if (player.nick === playerInfo.playerName && player.id) {
+          const newPlayerInfo = { ...playerInfo };
+          newPlayerInfo.playerId = player.id;
+          if (newPlayerInfo.playerId === gameData.nextPlayerId) {
+            newPlayerInfo.isHisTurn = true;
+          } else {
+            newPlayerInfo.isHisTurn = false;
+          }
+          newPlayerInfo.isHisTurn = true // override
+          setPlayerInfo(newPlayerInfo);
+        }
+      }
+    }
+  };
 
   const loadPawns = () => {
     if (gameData) {
@@ -54,22 +75,66 @@ const GamesBoard = ({ location: { state } }) => {
     let isLocationTaken = false;
     player.pawns.forEach((pawn) => {
       if (pawn.location === location) {
-        console.log('Pawn assignment to base: ', location, pawn.location);
+        console.log('DEBUG: Pawn assignment to base: ', location, pawn.location);
         isLocationTaken = true;
       }
     });
     return isLocationTaken;
   };
 
-  const startGame = () => {
-    console.log('Start Game!');
+  const startGame = async () => {
+    const requestOptions = {
+      method: 'PUT',
+      body: {
+        gameId: gameData.id,
+      },
+    };
+    let path = '';
+    if (window.location.port === '3000') {
+      path = 'http://localhost:8080';
+    }
+    const response = await fetch(path + `/api/games/${gameData.id}/start`, requestOptions);
+    const data = await response.json();
+    if (data && !data?.error) {
+      if (data?.players?.length > 1) {
+        console.log('DEBUG: GameBoard: StartGame: ', data);
+        setGameData(data);
+      } else {
+        console.warn('DEBUG: The number of players is not correct!');
+      }
+    } else {
+      console.error('ERROR: GameBoard: StartGame failed!');
+    }
   };
 
-  const rollDice = () => {
-    console.log('Roll Dice!');
+  const rollDice = async () => {
+    if (gameData && gameData.id && playerInfo?.playerName) {
+      if (playerInfo.isHisTurn) {
+        console.log(`DEBUG: GameBoard: Roll Dice w/ userName: ${playerInfo.playerName}`);
+        let path = '';
+        if (window.location.port === '3000') {
+          path = 'http://localhost:8080';
+        }
+        const response = await fetch(path + `api/games/${gameData.id}/player/${playerInfo.playerId}/dice`);
+        const data = await response.json();
+        if (data && data?.length !== 0) {
+          const newPlayerInfo = { ...playerInfo };
+          newPlayerInfo.moveablePawns = data;
+          setPlayerInfo(newPlayerInfo);
+        }
+      } else {
+        console.log('DEBUG: GameBoard: rollDice: its not your turn!');
+      }
+    } else {
+      console.error(`DEBUG: Gameboard: cannot roll dice w/o uninitialized data: ${gameData}, ${playerInfo.playerName}`);
+    }
   };
 
-  console.log('GameBoard initialize params: ', state);
+  const movePawn = () => {
+    console.log(`DEBUG: GameBoard: MovePawn`);
+  };
+
+  console.log('DEBUG: GameBoard initialize params: ', state);
 
   return (
     <>
@@ -236,8 +301,8 @@ const GamesBoard = ({ location: { state } }) => {
           </StyledRow>
           <StyledRow>
             <HeaderSection>
-              <Label>{gameData?.players[1]?.nick || 'Player 2'}</Label>
               <Label>{gameData?.players[2]?.nick || 'Player 3'}</Label>
+              <Label>{gameData?.players[1]?.nick || 'Player 2'}</Label>
             </HeaderSection>
           </StyledRow>
         </StyledGameBoardContainer>
