@@ -13,7 +13,6 @@ const GamesList = () => {
   const [userName, setUserName] = useState('');
   const [shouldRedirect, setRedirect] = useState(false);
   const [activeGame, setActiveGame] = useState({});
-  const [isConnectionClosed, setConnectionClosed] = useState(false);
   const [clientConnection, setClientConnection] = useState(null);
   const [channels, setChannels] = useState(new Map());
   let client = '';
@@ -200,7 +199,9 @@ const GamesList = () => {
               <Form formValues={userName} handleInputChange={handleInputChange}></Form>
               <h3>Then select which game you would like to enter:</h3>
               {gamesList
-                ? gamesList?.map((gameList, index) => <GamesListItem key={gameList.id} index={index} userData={gameList} joinGame={joinGame} />)
+                ? gamesList?.map((gameList, index) => (
+                    <GamesListItem key={gameList.id} index={index} userData={gameList} joinGame={joinGame} userName={userName} />
+                  ))
                 : ''}
               <br></br>
               <button onClick={createGameHandler}>Create new game</button>

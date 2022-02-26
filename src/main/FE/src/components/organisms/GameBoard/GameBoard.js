@@ -38,7 +38,6 @@ const GamesBoard = ({ location: { state } }) => {
     console.log('DEBUG: GameBoard: Pawns Object updated!', pawnsObject);
   }, [pawnsObject]);
 
-
   useEffect(() => {
     findNextPlayer();
   }, [gameData]);
