@@ -8,7 +8,6 @@ import { StyledBox, Icon } from './Box.styles';
 const Box = (props) => {
   const [pawnsObject, setPawnsArray] = useState(props.pawnsArray);
   const [pawnToBeDisplayed, setPawnsToBeDisplayed] = useState([]);
-  const [loadingState, setLoadingState] = useState(false);
 
   useEffect(() => {
     // console.log('Pawns Array in Box component: ', pawnsArray);
@@ -32,7 +31,6 @@ const Box = (props) => {
     if (pawnsObject) {
       for (const [key, value] of Object.entries(pawnsObject)) {
         if (props.id === value.location) {
-          // FIXME - BASE fields
           setPawnsToBeDisplayed(value.color);
           console.log(`Pawn to be displayed: ', ${value.color}, ${value.location}, key: ${key}`);
         }
@@ -43,13 +41,13 @@ const Box = (props) => {
   const renderSwitch = () => {
     switch (pawnToBeDisplayed) {
       case 'YELLOW':
-        return <Icon src={YellowPawn} alt="YellowPawn" title={props.id} id={props.id} />;
+        return <Icon src={YellowPawn} alt="YellowPawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       case 'BLUE':
-        return <Icon src={BluePawn} alt="BluePawn" title={props.id} id={props.id} />;
+        return <Icon src={BluePawn} alt="BluePawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       case 'GREEN':
-        return <Icon src={GreenPawn} alt="GreenPawn" title={props.id} id={props.id} />;
+        return <Icon src={GreenPawn} alt="GreenPawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       case 'RED':
-        return <Icon src={RedPawn} alt="RedPawn" title={props.id} id={props.id} />;
+        return <Icon src={RedPawn} alt="RedPawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       default:
         break;
     }

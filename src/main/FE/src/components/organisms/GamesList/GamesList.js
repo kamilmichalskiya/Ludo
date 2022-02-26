@@ -13,8 +13,9 @@ const GamesList = () => {
   const [userName, setUserName] = useState('');
   const [shouldRedirect, setRedirect] = useState(false);
   const [activeGame, setActiveGame] = useState({});
-  const [websocket, setWebSocket] = useState(null);
+  const [isConnectionClosed, setConnectionClosed] = useState(false);
   const [clientConnection, setClientConnection] = useState(null);
+  const [channels, setChannels] = useState(new Map());
   let client = '';
 
   useEffect(() => {
@@ -40,7 +41,6 @@ const GamesList = () => {
   }, [activeGame]);
 
   useEffect(() => {
-    createConnection();
     if (gamesList.length !== 0) {
       setGamesList(gamesList);
     }
@@ -51,6 +51,7 @@ const GamesList = () => {
     if (gameIndex > 0) {
       joinGame(gameId, gameIndex);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameIndex]);
 
   const getAllActiveGames = async () => {
@@ -80,7 +81,7 @@ const GamesList = () => {
       path += window.location.host;
     }
     client = Stomp.client(path + '/queue');
-    setClientConnection(client)
+    setClientConnection(client);
     console.log('DEBUG: Stomp connect');
     client.connect(
       {},
@@ -100,7 +101,7 @@ const GamesList = () => {
         console.log(`DEBUG: Websocket returned value: ${message}`);
         if (gamesList.length !== 0) {
           const newGamesList = [...gamesList];
-          const newGame = JSON.parse(message.body)
+          const newGame = JSON.parse(message.body);
           for (const game of newGamesList) {
             if (game.id === newGame.id) {
               newGamesList[game] = newGame;
@@ -111,17 +112,19 @@ const GamesList = () => {
           newGamesList.push(newGame);
           setGamesList(newGamesList);
         }
+        setChannels(new Map(channels.set(id, subscription)));
       }
     });
-    if (subscription) {
-      setWebSocket(subscription);
-      console.log(`DEBUG: GamesList: subscribe w/ ${id}`);
-    }
   };
 
-  const unsubscribe = () => {
-    websocket.unsubscribe();
+  const unsubscribe = (id = 'all') => {
     console.log('DEBUG: GamesList: unsubscribe');
+    const subscription = channels.get(id);
+    if (subscription) {
+      subscription.unsubscribe();
+      setChannels(new Map());
+    }
+    // clientConnection.disconnect();
   };
 
   const createGameHandler = async () => {
@@ -168,8 +171,8 @@ const GamesList = () => {
       data.userName = userName;
       setActiveGame(data);
       setGameIndex(index);
-      // unsubscribe();
-      subscribe(data.id);
+      unsubscribe();
+      // subscribe(data.id);
       setRedirect(true);
       // createConnection(data.id);
     } else if (!userName) {
