@@ -48,6 +48,7 @@ const GamesBoard = ({ location: { state } }) => {
 
   useEffect(() => {
     if (diceResult > 0) {
+      console.log('Set play video state', new Date());
       setPlayVideoState(true);
     }
   }, [diceResult]);
@@ -87,6 +88,7 @@ const GamesBoard = ({ location: { state } }) => {
     const client2 = client ? client : clientConnection;
     const subscription = client2.subscribe('/game/' + id, (message) => {
       if (message) {
+        console.log('Set gameData state', new Date());
         setGameData(JSON.parse(message.body));
       }
     });
@@ -94,11 +96,10 @@ const GamesBoard = ({ location: { state } }) => {
       if (message) {
         const newPlayerInfo = { ...playerInfo };
         newPlayerInfo.diceResult = JSON.parse(message.body);
+        console.log('Set playerInfo state', new Date());
         setPlayerInfo(newPlayerInfo);
+        setDiceResult(0);
         setDiceResult(JSON.parse(message.body));
-        // movie
-        // kostka (z automatu)
-        // podświetlić pionki
       }
     });
     setChannels(new Map(channels.set(id, subscription)));
@@ -132,7 +133,6 @@ const GamesBoard = ({ location: { state } }) => {
           } else {
             newPlayerInfo.isHisTurn = false;
           }
-          newPlayerInfo.isHisTurn = true; // override to be removed
           newPlayerInfo.color = player.pawns[0].color;
           newPlayerInfo.pawns = player.pawns;
           setPlayerInfo(newPlayerInfo);
@@ -220,6 +220,8 @@ const GamesBoard = ({ location: { state } }) => {
           const newPlayerInfo = { ...playerInfo };
           newPlayerInfo.moveablePawns = data;
           setPlayerInfo(newPlayerInfo);
+        } else {
+          setDiceResult(0);
         }
       } else {
         console.log('DEBUG: GameBoard: rollDice: its not your turn!');
@@ -230,7 +232,7 @@ const GamesBoard = ({ location: { state } }) => {
   };
 
   const movePawn = async (pawnLocation) => {
-    if (pawnLocation) {
+    if (pawnLocation && playerInfo.isHisTurn) {
       for (const pawn in pawnsObject) {
         if (pawnsObject[pawn].location === pawnLocation) {
           const pawnId = pawn;
@@ -248,6 +250,7 @@ const GamesBoard = ({ location: { state } }) => {
           }
           const response = await fetch(path + `/api/pawns/${pawnId}/move/${diceResult}`, requestOptions);
           const data = await response.json();
+          setDiceResult(0);
           console.log(`DEBUG: GameBoard: movePawn: ${pawnId} ${diceResult} Result ${data}`);
           // getGame();
         }
