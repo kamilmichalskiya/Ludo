@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { ReactComponent as YellowPawn } from 'assets/icons/yellow_pawn.svg';
-import { ReactComponent as RedPawn } from 'assets/icons/red_pawn.svg';
-import { ReactComponent as BluePawn } from 'assets/icons/blue_pawn.svg';
-import { ReactComponent as GreenPawn } from 'assets/icons/green_pawn.svg';
-import { StyledBox } from './Box.styles';
+import YellowPawn from 'assets/icons/yellow_pawn.svg';
+import RedPawn from 'assets/icons/red_pawn.svg';
+import BluePawn from 'assets/icons/blue_pawn.svg';
+import GreenPawn from 'assets/icons/green_pawn.svg';
+import { StyledBox, Icon } from './Box.styles';
 
 const Box = (props) => {
   const [pawnsObject, setPawnsArray] = useState(props.pawnsArray);
   const [pawnToBeDisplayed, setPawnsToBeDisplayed] = useState([]);
-  const [loadingState, setLoadingState] = useState(false);
 
   useEffect(() => {
-    // const pawnsArray = findPawnsToBeDisplayed();
     // console.log('Pawns Array in Box component: ', pawnsArray);
   }, []);
 
@@ -22,9 +20,6 @@ const Box = (props) => {
   useEffect(() => {
     if (pawnsObject) {
       findPawnsToBeDisplayed();
-      if (pawnsObject) {
-        console.log('Pawns Object in Box component: ', pawnsObject);
-      }
     }
   }, [pawnsObject]);
 
@@ -36,32 +31,29 @@ const Box = (props) => {
     if (pawnsObject) {
       for (const [key, value] of Object.entries(pawnsObject)) {
         if (props.id === value.location) {
-          // FIXME - BASE fields
           setPawnsToBeDisplayed(value.color);
-          console.log('Pawn to be displayed: ', value.color, value.location, value.id);
+          console.log(`Pawn to be displayed: ', ${value.color}, ${value.location}, key: ${key}`);
         }
       }
     }
   };
 
-  const renderSwitch = (param) => {
-    switch (param) {
+  const renderSwitch = () => {
+    switch (pawnToBeDisplayed) {
       case 'YELLOW':
-        return (
-          <YellowPawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />
-        );
-      case 'RED':
-        return <RedPawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <Icon src={YellowPawn} alt="YellowPawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       case 'BLUE':
-        return <BluePawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <Icon src={BluePawn} alt="BluePawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       case 'GREEN':
-        return <GreenPawn title={props.id} id={props.id} style={{ width: '50px', height: '50px', left: '0', right: '0', transform: 'scale(70%)' }} />;
+        return <Icon src={GreenPawn} alt="GreenPawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
+      case 'RED':
+        return <Icon src={RedPawn} alt="RedPawn" title={props.id} id={props.id} onClick={() => props.movePawn(props.id)} />;
       default:
         break;
     }
   };
 
-  return <StyledBox {...props}>{renderSwitch(pawnToBeDisplayed)}</StyledBox>;
+  return <StyledBox {...props}>{renderSwitch()}</StyledBox>;
 };
 
 export default Box;

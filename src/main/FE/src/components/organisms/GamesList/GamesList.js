@@ -8,84 +8,122 @@ import Stomp from 'stompjs';
 const GamesList = () => {
   const [gamesList, setGamesList] = useState([]);
   const [isLoading, setLoadingState] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [gameId, setGameId] = useState('');
   const [gameIndex, setGameIndex] = useState(0);
   const [userName, setUserName] = useState('');
   const [shouldRedirect, setRedirect] = useState(false);
-  let client = null;
-  let subscription = '';
+  const [activeGame, setActiveGame] = useState({});
+  const [clientConnection, setClientConnection] = useState(null);
+  const [channels, setChannels] = useState(new Map());
+  let client = '';
 
   useEffect(() => {
     setLoadingState(true);
     getAllActiveGames();
-    if (!client) {
-      createConnection();
-    }
-
-    let i = 0;
-    while (!client.connected && i <= 10) {
-      setTimeout(100);
-      i++;
-    }
-    if (client.connected) {
-      subscribe('all');
-    }
   }, []);
 
   useEffect(() => {
     setLoadingState(false);
-    console.log('GameBoard: isLoading', isLoading);
+    console.log('DEBUG: GameBoard: isLoading', isLoading);
   }, [isLoading]);
 
   useEffect(() => {
     if (gamesList?.length !== 0) {
-      console.log('GamesList: gamesList param state updated:', gamesList);
+      console.log('DEBUG: GamesList: gamesList param state updated:', gamesList);
     }
   }, [gamesList]);
 
+  useEffect(() => {
+    if (activeGame && Object.keys(activeGame).length !== 0) {
+      setRedirect(true);
+    }
+  }, [activeGame]);
+
+  useEffect(() => {
+    if (gamesList.length !== 0) {
+      setGamesList(gamesList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gamesList]);
+
+  useEffect(() => {
+    if (gameIndex > 0) {
+      joinGame(gameId, gameIndex);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameIndex]);
+
   const getAllActiveGames = async () => {
     setLoadingState(true);
-    console.log('GameList: getAllActiveGames');
+    console.log('DEBUG: GameList: getAllActiveGames');
     let path = '';
-    if(window.location.port==='3000'){
-      path='http://localhost:8080';
+    if (window.location.port === '3000') {
+      path = 'http://localhost:8080';
     }
-    const response = await fetch(path+'/api/games');
+    const response = await fetch(path + '/api/games');
     const data = await response.json();
     setGamesList(data);
-
     setLoadingState(false);
   };
 
-  const createConnection = () => {
+  const createConnection = (id = 'all') => {
     // client = Stomp.client('wss://chinczyk4.herokuapp.com/queue');
     // client = Stomp.client("ws://localhost:8080/queue");
-    let path = "ws://";
-    if (window.location.protocol==="https:"){
-      path ="wss://"
+    let path = 'ws://';
+    if (window.location.protocol === 'https:') {
+      path = 'wss://';
     }
-    path+=window.location.host;
-    client = Stomp.client(path + "/queue");
-    console.log('Stomp connect');
+    if (window.location.port === '3000') {
+      // path += 'localhost:8080';
+      return; // clear console errors for FE development
+    } else {
+      path += window.location.host;
+    }
+    client = Stomp.client(path + '/queue');
+    setClientConnection(client);
+    console.log('DEBUG: Stomp connect');
     client.connect(
-        {},
-        function (frame) {},
-        function (frame) {
-          createConnection();
-        }
+      {},
+      function (frame) {
+        subscribe(id);
+      },
+      function (frame) {
+        createConnection();
+      }
     );
   };
 
-  const subscribe = (id = gameId) => {
-    subscription = client.subscribe('/game/' + id, (message) => {
-      console.log(`Websocket returned value: ${message}`);
-      // let logBody = '';
-      // logBody = logBody.concat('|| id: ', body.id);
-      // logBody = logBody.concat(' || status: ', body.status);
-      // logBody = logBody.concat(' || players: ', body.players.length);
-      // logBody = logBody.concat(' || pawns: ', body.pawns.length);
+  const subscribe = (id = 'all') => {
+    const client2 = client ? client : clientConnection;
+    const subscription = client2.subscribe('/game/' + id, (message) => {
+      if (message) {
+        console.log(`DEBUG: Websocket returned value: ${message}`);
+        if (gamesList.length !== 0) {
+          const newGamesList = [...gamesList];
+          const newGame = JSON.parse(message.body);
+          for (const game of newGamesList) {
+            if (game.id === newGame.id) {
+              newGamesList[game] = newGame;
+              setGamesList(newGamesList);
+              return;
+            }
+          }
+          newGamesList.push(newGame);
+          setGamesList(newGamesList);
+        }
+        setChannels(new Map(channels.set(id, subscription)));
+      }
     });
+  };
+
+  const unsubscribe = (id = 'all') => {
+    console.log('DEBUG: GamesList: unsubscribe');
+    const subscription = channels.get(id);
+    if (subscription) {
+      subscription.unsubscribe();
+      setChannels(new Map());
+    }
+    // clientConnection.disconnect();
   };
 
   const createGameHandler = async () => {
@@ -94,12 +132,12 @@ const GamesList = () => {
         method: 'POST',
       };
       let path = '';
-      if(window.location.port==='3000'){
-        path='http://localhost:8080';
+      if (window.location.port === '3000') {
+        path = 'http://localhost:8080';
       }
-      const response = await fetch(path+'/api/games/new', requestOptions);
+      const response = await fetch(path + '/api/games/new', requestOptions);
       const data = await response.json();
-      console.log('GamesList: CreateGameHandler: ', data);
+      console.log('DEBUG: GamesList: CreateGameHandler: ', data);
       if (data.id) {
         setGameId(data.id);
         setGameIndex(gamesList.length);
@@ -111,15 +149,9 @@ const GamesList = () => {
     }
   };
 
-  useEffect(() => {
-    if (gameIndex > 0) {
-      joinGame(gameId, gameIndex);
-    }
-  }, [gameIndex]);
-
   const joinGame = async (gameId, index = gameIndex) => {
     if (userName && gameId) {
-      console.log(`GamesList: joinGame with gameId: ${gameId}`);
+      console.log(`DEBUG: GamesList: joinGame with gameId: ${gameId}`);
       const requestOptions = {
         method: 'PUT',
         body: {
@@ -128,31 +160,34 @@ const GamesList = () => {
         },
       };
       let path = '';
-      if(window.location.port==='3000'){
-        path='http://localhost:8080';
+      if (window.location.port === '3000') {
+        path = 'http://localhost:8080';
       }
-      const response = await fetch(path+`/api/players/${userName}/join/${gameId}`, requestOptions);
+      const response = await fetch(path + `/api/players/${userName}/join/${gameId}`, requestOptions);
       const data = await response.json();
-      console.log('GamesList: join game: ', data);
-      setGamesList((gamesList) => [...gamesList, data]);
+      console.log('DEBUG: GamesList: join game: ', data);
+      // setGamesList((gamesList) => [...gamesList, data]);
+      data.userName = userName;
+      setActiveGame(data);
       setGameIndex(index);
+      unsubscribe();
+      // subscribe(data.id);
       setRedirect(true);
-      subscribe(data.gameId);
-    } else {
+      // createConnection(data.id);
+    } else if (!userName) {
       console.warn('Please provide username!');
     }
   };
 
   const handleInputChange = (e) => {
     if (e.target.value) {
-      console.log(e.target.value);
       setUserName(e.target.value);
     }
   };
 
   return (
     <>
-      {shouldRedirect ? <Redirect push to={{ pathname: '/game-board', state: gamesList[gameIndex] }} /> : null}
+      {shouldRedirect ? <Redirect push to={{ pathname: '/game-board', state: { activeGame, playerName: userName } }} /> : null}
       <Wrapper>
         <StyledTitle>Welcome to the Lugo Game!</StyledTitle>
         <StyledList>
@@ -164,7 +199,9 @@ const GamesList = () => {
               <Form formValues={userName} handleInputChange={handleInputChange}></Form>
               <h3>Then select which game you would like to enter:</h3>
               {gamesList
-                ? gamesList?.map((gameList, index) => <GamesListItem key={gameList.id} index={index} userData={gameList} joinGame={joinGame} />)
+                ? gamesList?.map((gameList, index) => (
+                    <GamesListItem key={gameList.id} index={index} userData={gameList} joinGame={joinGame} userName={userName} />
+                  ))
                 : ''}
               <br></br>
               <button onClick={createGameHandler}>Create new game</button>
