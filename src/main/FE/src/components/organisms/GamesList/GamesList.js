@@ -123,7 +123,6 @@ const GamesList = () => {
       subscription.unsubscribe();
       setChannels(new Map());
     }
-    // clientConnection.disconnect();
   };
 
   const createGameHandler = async () => {
