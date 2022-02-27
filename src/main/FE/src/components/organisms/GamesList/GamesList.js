@@ -23,14 +23,6 @@ const GamesList = () => {
   }, []);
 
   useEffect(() => {
-    createConnection();
-    if (gamesList.length !== 0) {
-      setGamesList(gamesList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gamesList]);
-
-  useEffect(() => {
     setLoadingState(false);
     console.log('DEBUG: GameBoard: isLoading', isLoading);
   }, [isLoading]);
@@ -96,7 +88,7 @@ const GamesList = () => {
         subscribe(id);
       },
       function (frame) {
-        createConnection(id);
+        createConnection();
       }
     );
   };
