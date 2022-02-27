@@ -220,22 +220,6 @@ const GamesBoard = ({ location: { state } }) => {
           const newPlayerInfo = { ...playerInfo };
           newPlayerInfo.moveablePawns = data;
           setPlayerInfo(newPlayerInfo);
-        } else {
-          const anyPawnId = playerInfo.pawns[0].id;
-          const requestOptions = {
-            method: 'PUT',
-            body: {
-              distance: 1,
-              pawnId: anyPawnId,
-            },
-          };
-          let path = '';
-          if (window.location.port === '3000') {
-            path = 'http://localhost:8080';
-          }
-          const response = await fetch(path + `/api/pawns/${anyPawnId}/move/1`, requestOptions);
-          const data = await response.json();
-          console.log(`GameBoard: rollDice hardcoded 1: ${data}`);
         }
       } else {
         console.log('DEBUG: GameBoard: rollDice: its not your turn!');

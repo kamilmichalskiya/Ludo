@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.chinczyk.game.model.entity.Game;
 import pl.lodz.chinczyk.game.service.GameService;
+import pl.lodz.chinczyk.game.service.repository.GameRepository;
 import pl.lodz.chinczyk.pawn.model.Color;
 import pl.lodz.chinczyk.pawn.model.Move;
 import pl.lodz.chinczyk.pawn.model.entity.Pawn;
@@ -38,6 +39,7 @@ import static pl.lodz.chinczyk.pawn.model.LocationType.HOME;
 public class PawnService {
     private final PawnRepository repository;
     private final GameService gameService;
+    private final GameRepository gameRepository;
     private final MessageSender messageSender;
 
     public List<Pawn> createPawnsForGame(@NonNull Player player, @NonNull UUID gameId) {
@@ -74,8 +76,6 @@ public class PawnService {
                 .map(selectedPawn -> {
                     List<Pawn> possibleMoves = getPossibleMoves(selectedPawn.getGame().getId(), selectedPawn.getColor(), distance);
                     if (possibleMoves.isEmpty()) {
-                        prepareGameForNextTurn(selectedPawn.getGame().getId(), distance, selectedPawn.getColor());
-                        messageSender.updateGame(selectedPawn.getGame());
                         return null;
                     } else if (possibleMoves.stream().noneMatch(pawn -> pawn.getId().equals(selectedPawn.getId()))) {
                         return null;
@@ -106,9 +106,9 @@ public class PawnService {
     }
 
     @Transactional
-    public void prepareGameForNextTurn(@NonNull UUID gameId, int distance, @NonNull Color currentColor) {
-        gameService.findById(gameId)
-                .ifPresent(game -> {
+    public Optional<Game> prepareGameForNextTurn(@NonNull UUID gameId, int distance, @NonNull Color currentColor) {
+        return gameService.findById(gameId)
+                .map(game -> {
                     if (isGameDone(game.getPawns(), currentColor)) {
                         game.setStatus(DONE);
                     } else if (distance != 6) {
@@ -120,6 +120,7 @@ public class PawnService {
                         }
                         game.setNextPlayerId(mapOfPlayersAndColors.get(nextColor));
                     }
+                    return game;
                 });
     }
 
@@ -171,7 +172,13 @@ public class PawnService {
                 .map(nextPlayerId -> new Random().nextInt(6) + 1)
                 .map(distance -> {
                     messageSender.sendRollDiceInfo(gameId, distance);
-                    return getPossibleMoves(gameId, color[0], distance).stream().map(Pawn::getId).collect(Collectors.toList());
+                    final List<UUID> list = getPossibleMoves(gameId, color[0], distance).stream().map(Pawn::getId).collect(Collectors.toList());
+                    if (list.isEmpty()) {
+                        final Game game = prepareGameForNextTurn(gameId, distance, color[0]).orElseGet(null);
+                        messageSender.updateGame(game);
+                        gameRepository.saveAndFlush(game);
+                    }
+                    return list;
                 });
     }
 }
