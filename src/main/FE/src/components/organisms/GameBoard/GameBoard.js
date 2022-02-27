@@ -78,7 +78,7 @@ const GamesBoard = ({ location: { state } }) => {
         subscribe(id);
       },
       function (frame) {
-        createConnection();
+        createConnection(gameData.id);
       }
     );
   };
@@ -265,7 +265,7 @@ const GamesBoard = ({ location: { state } }) => {
           const response = await fetch(path + `/api/pawns/${pawnId}/move/${diceResult}`, requestOptions);
           const data = await response.json();
           console.log(`DEBUG: GameBoard: movePawn: ${pawnId} ${diceResult} Result ${data}`);
-          getGame();
+          // getGame();
         }
       }
     }
