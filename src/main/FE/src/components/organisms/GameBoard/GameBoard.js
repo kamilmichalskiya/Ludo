@@ -98,7 +98,6 @@ const GamesBoard = ({ location: { state } }) => {
         newPlayerInfo.diceResult = JSON.parse(message.body);
         console.log('Set playerInfo state', new Date());
         setPlayerInfo(newPlayerInfo);
-        setDiceResult(0);
         setDiceResult(JSON.parse(message.body));
       }
     });
