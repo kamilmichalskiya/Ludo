@@ -21,7 +21,7 @@ const GamesBoard = ({ location: { state } }) => {
     playerId: null,
     color: null,
     isHisTurn: false,
-    diceResult: 0,
+    diceResult: 1,
     pawns: [],
     moveablePawns: [],
   });
@@ -52,9 +52,12 @@ const GamesBoard = ({ location: { state } }) => {
     }
   }, [diceResult]);
 
-  // useEffect(() => {
-  //   findNextPlayer();
-  // }, [gameData]);
+  useEffect(() => {
+    if (gameData) {
+      loadPawns();
+      setPlayerId();
+    }
+  }, [gameData]);
 
   const createConnection = (id = 'all') => {
     let path = 'ws://';
@@ -215,11 +218,24 @@ const GamesBoard = ({ location: { state } }) => {
         const data = await response.json();
         if (data && data?.length !== 0) {
           const newPlayerInfo = { ...playerInfo };
-          if (data.length === 0) {
-            newPlayerInfo.isHisTurn = false;
-          }
           newPlayerInfo.moveablePawns = data;
           setPlayerInfo(newPlayerInfo);
+        } else {
+          const anyPawnId = playerInfo.pawns[0].id;
+          const requestOptions = {
+            method: 'PUT',
+            body: {
+              distance: 1,
+              pawnId: anyPawnId,
+            },
+          };
+          let path = '';
+          if (window.location.port === '3000') {
+            path = 'http://localhost:8080';
+          }
+          const response = await fetch(path + `/api/pawns/${anyPawnId}/move/1`, requestOptions);
+          const data = await response.json();
+          console.log(`GameBoard: rollDice hardcoded 1: ${data}`);
         }
       } else {
         console.log('DEBUG: GameBoard: rollDice: its not your turn!');
@@ -229,33 +245,41 @@ const GamesBoard = ({ location: { state } }) => {
     }
   };
 
-  const movePawn = async (pawnId) => {
-    if (pawnId) {
-      console.log(`DEBUG: GameBoard: movePawn w/ ${pawnId}`);
-      const { pawns } = playerInfo;
-      if (playerInfo.pawns.length !== 0) {
-        for (const pawn of pawns) {
-          if (pawn.id === pawnId) {
-            const requestOptions = {
-              method: 'PUT',
-              body: {
-                distance: playerInfo.diceResult,
-                pawnId,
-              },
-            };
-            let path = '';
-            if (window.location.port === '3000') {
-              path = 'http://localhost:8080';
-            }
-            const response = await fetch(path + `/api/pawns/${pawnId}/start/${playerInfo.diceResult}`, requestOptions);
-            const data = await response.json();
-            console.log(`DEBUG: GameBoard: movePawn: ${pawnId} ${playerInfo.diceResult} Result ${data}`);
+  const movePawn = async (pawnLocation) => {
+    if (pawnLocation) {
+      for (const pawn in pawnsObject) {
+        if (pawnsObject[pawn].location === pawnLocation) {
+          const pawnId = pawn;
+          console.log(`DEBUG: GameBoard: movePawn w/ ${pawnId}`);
+          const requestOptions = {
+            method: 'PUT',
+            body: {
+              distance: diceResult,
+              pawnId,
+            },
+          };
+          let path = '';
+          if (window.location.port === '3000') {
+            path = 'http://localhost:8080';
           }
+          const response = await fetch(path + `/api/pawns/${pawnId}/move/${diceResult}`, requestOptions);
+          const data = await response.json();
+          console.log(`DEBUG: GameBoard: movePawn: ${pawnId} ${diceResult} Result ${data}`);
+          getGame();
         }
       }
-    } else {
-      console.error('GameBoard: movePawn: Missing pawnId!');
     }
+  };
+
+  const getGame = async () => {
+    let path = '';
+    if (window.location.port === '3000') {
+      path = 'http://localhost:8080';
+    }
+    const response = await fetch(path + `/api/games/${gameData.id}`);
+    const data = await response.json();
+    const newGameData = { ...data };
+    setGameData(newGameData);
   };
 
   const findNextPlayer = () => {
@@ -323,7 +347,7 @@ const GamesBoard = ({ location: { state } }) => {
           <PrimaryButton onClick={startGame}>Start Game!</PrimaryButton>
           <PrimaryButton onClick={rollDice}>Roll Dice!</PrimaryButton>
           <Link to="/">
-            <PrimaryButton>Leave Game :c</PrimaryButton>
+            <PrimaryButton>Leave Game</PrimaryButton>
           </Link>
         </StyledNavigation>
 
