@@ -25,7 +25,7 @@ const GamesBoard = ({ location: { state } }) => {
     pawns: [],
     moveablePawns: [],
   });
-  const [diceResult, setDiceResult] = useState(0);
+  const [diceResult, setDiceResult] = useState([0]);
   const [clientConnection, setClientConnection] = useState(null);
   const [channels, setChannels] = useState(new Map());
   const [rollChannels, setRollChannels] = useState(new Map());
@@ -47,7 +47,7 @@ const GamesBoard = ({ location: { state } }) => {
   }, [pawnsObject]);
 
   useEffect(() => {
-    if (diceResult > 0) {
+    if (diceResult[0] > 0) {
       console.log('Set play video state', new Date());
       setPlayVideoState(true);
     }
@@ -95,10 +95,10 @@ const GamesBoard = ({ location: { state } }) => {
     const rollSubscription = client2.subscribe('/roll/' + id, (message) => {
       if (message) {
         const newPlayerInfo = { ...playerInfo };
-        newPlayerInfo.diceResult = JSON.parse(message.body);
+        newPlayerInfo.diceResult = [JSON.parse(message.body)];
         console.log('Set playerInfo state', new Date());
         setPlayerInfo(newPlayerInfo);
-        setDiceResult(JSON.parse(message.body));
+        setDiceResult([JSON.parse(message.body)]);
       }
     });
     setChannels(new Map(channels.set(id, subscription)));
@@ -151,6 +151,16 @@ const GamesBoard = ({ location: { state } }) => {
         gameData?.players?.forEach((player) => {
           player.pawns.forEach((pawn) => {
             if (pawn.location.endsWith('_BASE')) {
+              if (!isLocationTaken(`${pawn.location}_1`, player)) {
+                pawn.location = `${pawn.location}_1`;
+              } else if (!isLocationTaken(`${pawn.location}_2`, player)) {
+                pawn.location = `${pawn.location}_2`;
+              } else if (!isLocationTaken(`${pawn.location}_3`, player)) {
+                pawn.location = `${pawn.location}_3`;
+              } else if (!isLocationTaken(`${pawn.location}_4`, player)) {
+                pawn.location = `${pawn.location}_4`;
+              }
+            } else if (pawn.location.endsWith('_HOME')) {
               if (!isLocationTaken(`${pawn.location}_1`, player)) {
                 pawn.location = `${pawn.location}_1`;
               } else if (!isLocationTaken(`${pawn.location}_2`, player)) {
@@ -219,8 +229,6 @@ const GamesBoard = ({ location: { state } }) => {
           const newPlayerInfo = { ...playerInfo };
           newPlayerInfo.moveablePawns = data;
           setPlayerInfo(newPlayerInfo);
-        } else {
-          setDiceResult(0);
         }
       } else {
         console.log('DEBUG: GameBoard: rollDice: its not your turn!');
@@ -239,7 +247,7 @@ const GamesBoard = ({ location: { state } }) => {
           const requestOptions = {
             method: 'PUT',
             body: {
-              distance: diceResult,
+              distance: diceResult[0],
               pawnId,
             },
           };
@@ -247,9 +255,9 @@ const GamesBoard = ({ location: { state } }) => {
           if (window.location.port === '3000') {
             path = 'http://localhost:8080';
           }
-          const response = await fetch(path + `/api/pawns/${pawnId}/move/${diceResult}`, requestOptions);
+          const response = await fetch(path + `/api/pawns/${pawnId}/move/${diceResult[0]}`, requestOptions);
           const data = await response.json();
-          setDiceResult(0);
+          setDiceResult([0]);
           console.log(`DEBUG: GameBoard: movePawn: ${pawnId} ${diceResult} Result ${data}`);
           // getGame();
         }
@@ -298,7 +306,7 @@ const GamesBoard = ({ location: { state } }) => {
     setPlayVideoState(false);
   };
 
-  const playRollDiceVideo = (number = diceResult) => {
+  const playRollDiceVideo = (number = diceResult[0]) => {
     let video;
     switch (number) {
       case 1:
@@ -375,7 +383,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
               <Box type="N" color="white" id="Y_7" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME_1" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_1" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
@@ -388,7 +396,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
               <Box type="N" color="white" id="Y_6" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME_2" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_2" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
@@ -401,7 +409,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
               <Box type="N" color="white" id="Y_5" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME_3" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_3" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
@@ -415,7 +423,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" color="white" id="Y_2" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="Y_3" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="Y_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME_4" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_4" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_5" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_6" pawnsArray={pawnsObject} movePawn={movePawn} />
@@ -424,15 +432,15 @@ const GamesBoard = ({ location: { state } }) => {
             </StyledRow>
             <StyledRow>
               <Box type="N" color="white" id="B_9" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Dice defaultValue={diceResult || 6} size="50" placement="top-right" disabled={true}></Dice>
-              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Dice defaultValue={diceResult[0] || 6} size="50" placement="top-right" disabled={true}></Dice>
+              <Box type="N" color="green" id="G_HOME_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_HOME_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_HOME_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_HOME_4" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="R_9" pawnsArray={pawnsObject} movePawn={movePawn} />
             </StyledRow>
             <StyledRow>
@@ -441,7 +449,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" color="white" id="B_6" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="B_5" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="B_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME_4" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="G_4" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="G_3" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="G_2" pawnsArray={pawnsObject} movePawn={movePawn} />
@@ -455,7 +463,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
               <Box type="N" color="white" id="B_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME_3" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="G_5" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
@@ -468,7 +476,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
               <Box type="N" color="white" id="B_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME_2" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="G_6" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
@@ -481,7 +489,7 @@ const GamesBoard = ({ location: { state } }) => {
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
               <Box type="N" color="white" id="B_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME_1" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" color="white" id="G_7" pawnsArray={pawnsObject} movePawn={movePawn} />
               <Box type="N" visibility="hidden" />
               <Box type="N" visibility="hidden" />
