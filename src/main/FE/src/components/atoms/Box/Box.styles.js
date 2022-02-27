@@ -13,7 +13,6 @@ export const StyledBox = styled.div`
   z-index: 0;
   visibility: ${(props) => props.visibility};
   box-shadow: 0 5px 15px -10px rgba(0, 0, 0, 0.3);
-  background-image: url('../../../assets/photos/czinczin.png');
 `;
 
 export const Icon = styled.img`

@@ -6,6 +6,12 @@ import { Wrapper, StyledRow, StyledNavigation, StyledGameBoardContainer, HeaderS
 import { Link } from 'react-router-dom';
 import Dice from 'react-dice-roll';
 import Stomp from 'stompjs';
+import rollDiceVideo1 from '../../../assets/gifs/roll_dice_1.mp4';
+import rollDiceVideo2 from '../../../assets/gifs/roll_dice_2.mp4';
+import rollDiceVideo3 from '../../../assets/gifs/roll_dice_3.mp4';
+import rollDiceVideo4 from '../../../assets/gifs/roll_dice_4.mp4';
+import rollDiceVideo5 from '../../../assets/gifs/roll_dice_5.mp4';
+import rollDiceVideo6 from '../../../assets/gifs/roll_dice_6.mp4';
 
 const GamesBoard = ({ location: { state } }) => {
   const [isLoading, setLoadingState] = useState(true);
@@ -19,10 +25,12 @@ const GamesBoard = ({ location: { state } }) => {
     pawns: [],
     moveablePawns: [],
   });
+  const [diceResult, setDiceResult] = useState(0);
   const [clientConnection, setClientConnection] = useState(null);
   const [channels, setChannels] = useState(new Map());
   const [rollChannels, setRollChannels] = useState(new Map());
   const [pawnsObject, setPawnsObject] = useState({});
+  const [playVideoState, setPlayVideoState] = useState(false);
   let client = '';
 
   useEffect(() => {
@@ -39,8 +47,14 @@ const GamesBoard = ({ location: { state } }) => {
   }, [pawnsObject]);
 
   useEffect(() => {
-    findNextPlayer();
-  }, [gameData]);
+    if (diceResult > 0) {
+      setPlayVideoState(true);
+    }
+  }, [diceResult]);
+
+  // useEffect(() => {
+  //   findNextPlayer();
+  // }, [gameData]);
 
   const createConnection = (id = 'all') => {
     let path = 'ws://';
@@ -78,6 +92,7 @@ const GamesBoard = ({ location: { state } }) => {
         const newPlayerInfo = { ...playerInfo };
         newPlayerInfo.diceResult = JSON.parse(message.body);
         setPlayerInfo(newPlayerInfo);
+        setDiceResult(JSON.parse(message.body));
         // movie
         // kostka (z automatu)
         // podświetlić pionki
@@ -248,12 +263,56 @@ const GamesBoard = ({ location: { state } }) => {
       const { players } = gameData;
       for (const player of players) {
         if (gameData.nextPlayerId === player.id) {
-          const newGameData = { ...gameData };
-          newGameData.nextPlayerName = player.nick;
-          setGameData(newGameData);
+          // const newGameData = { ...gameData };
+          // newGameData.nextPlayerName = player.nick;
+          // setGameData(newGameData);
+          return player.nick;
         }
       }
     }
+  };
+
+  const findPlayerName = (color) => {
+    if (gameData) {
+      const { players } = gameData;
+      for (const player of players) {
+        if (player?.pawns[0].color === color) {
+          return player.nick;
+        }
+      }
+    }
+  };
+
+  const onRollDiceVideoEnd = () => {
+    console.log('DEBUG: GameBoard: VideoEnd');
+    setPlayVideoState(false);
+  };
+
+  const playRollDiceVideo = (number = diceResult) => {
+    let video;
+    switch (number) {
+      case 1:
+        video = rollDiceVideo1;
+        break;
+      case 2:
+        video = rollDiceVideo2;
+        break;
+      case 3:
+        video = rollDiceVideo3;
+        break;
+      case 4:
+        video = rollDiceVideo4;
+        break;
+      case 5:
+        video = rollDiceVideo5;
+        break;
+      case 6:
+        video = rollDiceVideo6;
+        break;
+      default:
+        break;
+    }
+    return video;
   };
 
   return (
@@ -267,172 +326,179 @@ const GamesBoard = ({ location: { state } }) => {
             <PrimaryButton>Leave Game :c</PrimaryButton>
           </Link>
         </StyledNavigation>
-        <StyledGameBoardContainer>
-          <StyledRow>
-            <HeaderSection>
-              <Label>Your nickname: {playerInfo?.playerName || 'null'}</Label>
-              <Label>Next Player: {gameData.nextPlayerName || 'null'}</Label>
-            </HeaderSection>
-          </StyledRow>
-          <br></br> <br></br>
-          <StyledRow>
-            <HeaderSection>
-              <Label>{gameData?.players[3]?.nick || 'Player 4'}</Label>
-              <Label>{gameData?.players[0]?.nick || 'Player 1'}</Label>
-            </HeaderSection>
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" color="yellow" id="Y_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="yellow" id="Y_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="Y_8" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="Y_9" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_0" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="red" id="R_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" color="yellow" id="Y_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="yellow" id="Y_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="Y_7" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="red" id="R_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="Y_6" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="Y_5" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-          </StyledRow>
-          {/* Middle Section */}
-          <StyledRow>
-            <Box type="N" color="yellow" id="Y_0" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="Y_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="Y_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="Y_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="Y_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_5" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_6" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_7" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_8" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" color="white" id="B_9" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Dice defaultValue={playerInfo.diceResult || 6} size="50" placement="top-right" disabled={true}></Dice>
-            <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="R_9" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" color="white" id="B_8" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="B_7" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="B_6" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="B_5" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="B_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="green" id="G_0" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          {/* Lower Section */}
-          <StyledRow>
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="B_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_5" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="B_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_6" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" color="blue" id="B_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="blue" id="B_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="white" id="B_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_7" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="green" id="G_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="green" id="G_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          <StyledRow>
-            <Box type="N" color="blue" id="B_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="blue" id="B_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="blue" id="B_0" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_8" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="white" id="G_9" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" visibility="hidden" />
-            <Box type="N" color="green" id="G_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
-            <Box type="N" color="green" id="G_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
-          </StyledRow>
-          <StyledRow>
-            <HeaderSection>
-              <Label>{gameData?.players[2]?.nick || 'Player 3'}</Label>
-              <Label>{gameData?.players[1]?.nick || 'Player 2'}</Label>
-            </HeaderSection>
-          </StyledRow>
-        </StyledGameBoardContainer>
+
+        {playVideoState ? (
+          <video className="image" alt="dice-roll" onEnded={onRollDiceVideoEnd} controls autoPlay width="100%">
+            <source src={playRollDiceVideo()} type="video/mp4" />
+          </video>
+        ) : (
+          <StyledGameBoardContainer>
+            <StyledRow>
+              <HeaderSection>
+                <Label>Your nickname: {playerInfo?.playerName || 'null'}</Label>
+                <Label>Next Player: {findNextPlayer() || 'undefined'}</Label>
+              </HeaderSection>
+            </StyledRow>
+            <br></br> <br></br>
+            <StyledRow>
+              <HeaderSection>
+                <Label>{findPlayerName('YELLOW') || 'Player 4'}</Label>
+                <Label>{findPlayerName('RED') || 'Player 1'}</Label>
+              </HeaderSection>
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" color="yellow" id="Y_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="Y_8" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="Y_9" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_0" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="red" id="R_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" color="yellow" id="Y_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="Y_7" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="red" id="R_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="Y_6" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="Y_5" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+            </StyledRow>
+            {/* Middle Section */}
+            <StyledRow>
+              <Box type="N" color="yellow" id="Y_0" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="Y_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="Y_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="Y_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="Y_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="red" id="R_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_5" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_6" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_7" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_8" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" color="white" id="B_9" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="yellow" id="Y_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Dice defaultValue={diceResult || 6} size="50" placement="top-right" disabled={true}></Dice>
+              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="R_9" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" color="white" id="B_8" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="B_7" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="B_6" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="B_5" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="B_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_0" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            {/* Lower Section */}
+            <StyledRow>
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="B_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_5" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="B_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_6" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" color="blue" id="B_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="white" id="B_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_HOME" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_7" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="green" id="G_BASE_1" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_BASE_2" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            <StyledRow>
+              <Box type="N" color="blue" id="B_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="blue" id="B_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="blue" id="B_0" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_8" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="white" id="G_9" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" visibility="hidden" />
+              <Box type="N" color="green" id="G_BASE_3" pawnsArray={pawnsObject} movePawn={movePawn} />
+              <Box type="N" color="green" id="G_BASE_4" pawnsArray={pawnsObject} movePawn={movePawn} />
+            </StyledRow>
+            <StyledRow>
+              <HeaderSection>
+                <Label>{findPlayerName('BLUE') || 'Player 3'}</Label>
+                <Label>{findPlayerName('GREEN') || 'Player 2'}</Label>
+              </HeaderSection>
+            </StyledRow>
+          </StyledGameBoardContainer>
+        )}
       </Wrapper>
     </>
   );
